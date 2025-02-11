@@ -1,0 +1,466 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>Simulator Pet Level Up</title>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <script type="text/javascript" nonce="2a1f333c6bf942bc937b7592f2e" src="//local.adguard.org?ts=1739276924468&amp;type=content-script&amp;dmn=leejoonwhan.github.io&amp;url=https%3A%2F%2Fleejoonwhan.github.io%2Fstoneage%2Fsimulator%2Fpetlevelup.html&amp;app=chrome.exe&amp;css=3&amp;js=1&amp;rel=1&amp;rji=1&amp;sbe=1&amp;stealth=1&amp;st-push&amp;st-loc&amp;st-dnt"></script>
+<script type="text/javascript" nonce="2a1f333c6bf942bc937b7592f2e" src="//local.adguard.org?ts=1739276924468&amp;name=AdGuard%20Extra&amp;name=AdGuard%20Popup%20Blocker&amp;type=user-script"></script><link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/js/bootstrap.min.js"></script>
+    <style>
+        body { cursor: default; }
+        #btnTop {
+          display: none;
+          position: fixed;
+          bottom: 20px;
+          right: 30px;
+          z-index: 99;
+          font-size: 18px;
+          border: none;
+          outline: none;
+          background-color: red;
+          color: white;
+          cursor: poparseInter;
+          padding: 15px;
+          border-radius: 4px;
+        }
+
+        #btnTop:hover {
+          background-color: #555;
+        }
+        
+        /* 시뮬레이션 내역 5줄 이상 스크롤 */
+        .table-wrapper {
+            max-height: 260px; /* 10개의 tr 높이에 맞춰 설정합니다. */
+            overflow-y: auto;  /* 스크롤을 표시합니다. */
+        }
+
+        #results table {
+            width: 100%; /* 테이블 너비가 wrapper에 맞게 조정되도록 설정합니다. */
+            border-collapse: collapse; /* 테이블 경계선이 겹치도록 설정 */
+        }
+
+        #results thead th {
+            position: sticky;
+            top: 0;
+            background-color: white; /* 상단에 고정된 thead 배경을 설정 */
+            z-index: 1; /* 다른 요소들 위에 놓이도록 z-index 설정 */
+        }
+
+        /* 최소 너비 지정 */
+        .min-width-td-120 {
+            min-width: 120px; /* 원하는 최소 너비로 조정 */
+        }
+        /* 최소 너비 지정 */
+        .min-width-td-80 {
+            min-width: 80px; /* 원하는 최소 너비로 조정 */
+        }
+    
+        .green { color: #fff; background-color: #5cb85c;}
+        .blue { color: #fff; background-color: #337ab7;}
+        .red { color: #fff; background-color: #d9534f;}
+        .yellow { color: #fff; background-color: #f0ad4e;}
+    </style>
+    <script>
+
+        // 과거 내역
+        let results = [];
+        let detail  = [];
+        let content = {"rank": "", "level": "", "vital": "", "str": "", "tgh": "", "dex": "", "fRand": ""};
+
+        let maxLevel = 140;
+
+        // 샘플 페트 반기노 
+        const initnum = 26;
+        let base = [24.0, 38.0, 16.0, 20.0];
+
+        // 평균 값 계산을 위한 변수 선언 
+        let FRAND  = 0.0;
+        let FVITAL = 0.0;
+        let FSTR   = 0.0;
+        let FTGH   = 0.0;
+        let FDEX   = 0.0;
+        
+        // 스크롤
+        // 사용자가 문서 상단에서 50px 아래로 스크롤 할 때 버튼을 표시합니다.
+        window.onscroll = function() {scrollFunction()};
+        function scrollFunction() {
+            if (document.body.scrollTop > 50 || document.documentElement.scrollTop > 50) {
+                btnTop.style.display = "block";
+            } else {
+                btnTop.style.display = "none";
+            }
+        }
+
+        function limitDecimalPlaces(number, places) {
+            var power = Math.pow(10, places);
+            return (Math.floor(number * power) / power).toFixed(places);
+        }
+
+        function preciseRound(num) {
+            return Math.round(num * 1e12) / 1e12;
+        }
+        
+        function checkUpdateExists() {
+            const version = 20240922000;
+            fetch(`https://leejoonwhan.github.io/stoneage/simulator/petlevelup_version.json?v=${new Date().getTime()}`)
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('Network response was not ok');
+                    }
+                    return response.text();  // 응답을 텍스트로 읽음
+                })
+                .then(text => {
+                    try {
+                        const data = JSON.parse(text);  // 텍스트를 JSON으로 파싱
+                        log("ClientVer: " + version);
+                        log("ServerVer: " + data.version);
+                        if (version < data.version) {
+                            let message = "업데이트가 확인되었습니다.\n페이지를 새로고침합니다.";
+                            if (data.message != "") {
+                                message += `\n\n업데이트 내용: \n${data.message}`;
+                            }
+                            
+                            if (!alert(message)) {
+                                location.reload();
+                            }
+                        }
+                    } catch (error) {
+                        console.error('Parsing error:', error);
+                    }
+                })
+                .catch(error => {
+                    console.error('Error fetching the JSON file:', error);
+            });
+        }
+
+        function petLevelUp(base, stat) {
+            let param = [0.0, 0.0, 0.0, 0.0];
+            for (let i = 0; i < 10; i++) {
+                param[Math.floor(Math.random() * 4)] += 1.0;
+            }
+
+            let fRand = preciseRound((Math.floor(Math.random() * 51) + 470) * 0.01);
+            let vital = base[0];
+            let str   = base[1];
+            let tgh   = base[2];
+            let dex   = base[3];
+
+            vital = preciseRound(vital * fRand + param[0] * fRand);
+            str   = preciseRound(str   * fRand + param[1] * fRand);
+            tgh   = preciseRound(tgh   * fRand + param[2] * fRand);
+            dex   = preciseRound(dex   * fRand + param[3] * fRand);
+
+            stat[0] = parseInt(preciseRound(stat[0] + vital), 10);
+            stat[1] = parseInt(preciseRound(stat[1] + str),   10);
+            stat[2] = parseInt(preciseRound(stat[2] + tgh),   10);
+            stat[3] = parseInt(preciseRound(stat[3] + dex),   10);
+
+            // 통계를 위한 변수 저장
+            FRAND  = preciseRound(FRAND  + (fRand * 100));
+            FVITAL = preciseRound(FVITAL + param[0]);
+            FSTR   = preciseRound(FSTR   + param[1]);
+            FTGH   = preciseRound(FTGH   + param[2]);
+            FDEX   = preciseRound(FDEX   + param[3]);
+
+            return preciseRound(fRand * 100);
+        }
+
+        function log(message) {
+            const date = new Date();
+            
+            const year = date.getFullYear();
+            const month = String(date.getMonth() + 1).padStart(2, '0'); // 0-based index
+            const day = String(date.getDate()).padStart(2, '0');
+            
+            const hours = String(date.getHours()).padStart(2, '0');
+            const minutes = String(date.getMinutes()).padStart(2, '0');
+            const seconds = String(date.getSeconds()).padStart(2, '0');
+            const milliseconds = String(date.getMilliseconds()).padStart(3, '0');
+            
+            console.log(`[${year}-${month}-${day} ${hours}:${minutes}:${seconds}.${milliseconds}] ${message}`);
+        }
+
+        // jQuery
+        $(document).ready(function() {
+            
+            $(".form-inline button").on("click", function() {
+                
+                $('#detail tbody').empty();
+                maxLevel = 140;
+                if ($("#input-level").val() > 0) {
+                    maxLevel = $("#input-level").val();
+                }
+                
+                // 기본 베이스 설정
+                base = [24.0, 38.0, 16.0, 20.0];
+                
+                // 성장 베이스 설정
+                var buttonId = $(this).data("id");
+                if (buttonId == "rank8") {
+                    base[0] = preciseRound(base[0] + 2.0);
+                    base[1] = preciseRound(base[1] + 2.0);
+                    base[2] = preciseRound(base[2] + 2.0);
+                    base[3] = preciseRound(base[3] + 2.0);
+                }
+                else if (buttonId == "rank7vital") {
+                    base[0] = preciseRound(base[0] + 1.0);
+                    base[1] = preciseRound(base[1] + 2.0);
+                    base[2] = preciseRound(base[2] + 2.0);
+                    base[3] = preciseRound(base[3] + 2.0);
+                }
+                else if (buttonId == "rank7str") {
+                    base[0] = preciseRound(base[0] + 2.0);
+                    base[1] = preciseRound(base[1] + 1.0);
+                    base[2] = preciseRound(base[2] + 2.0);
+                    base[3] = preciseRound(base[3] + 2.0);
+                }
+                else if (buttonId == "rank7tgh") {
+                    base[0] = preciseRound(base[0] + 2.0);
+                    base[1] = preciseRound(base[1] + 2.0);
+                    base[2] = preciseRound(base[2] + 1.0);
+                    base[3] = preciseRound(base[3] + 2.0);
+                }
+                else if (buttonId == "rank7dex") {
+                    base[0] = preciseRound(base[0] + 2.0);
+                    base[1] = preciseRound(base[1] + 2.0);
+                    base[2] = preciseRound(base[2] + 2.0);
+                    base[3] = preciseRound(base[3] + 1.0);
+                }
+                
+                // 평균 값 계산을 위한 변수 선언 
+                FRAND  = 0.0;
+                FVITAL = 0.0;
+                FSTR   = 0.0;
+                FTGH   = 0.0;
+                FDEX   = 0.0;
+
+                let stat = [
+                    preciseRound(initnum * (base[0] + 2.0)),
+                    preciseRound(initnum * (base[1] + 3.0)),
+                    preciseRound(initnum * (base[2] + 2.0)),
+                    preciseRound(initnum * (base[3] + 3.0))
+                ];
+
+                const best1 = [52.0, 12.0, 7.0, 6.0];
+                const best2 = [9.97425, 2.4069375, 1.4268375, 1.21275];
+                let stat1 = [...stat];
+                for (let i = 1; i <= maxLevel; i++) {
+                    let vital = parseInt(preciseRound((i - 1) * best2[0] + best1[0]), 10);
+                    let str   = parseInt(preciseRound((i - 1) * best2[1] + best1[1]), 10);
+                    let tgh   = parseInt(preciseRound((i - 1) * best2[2] + best1[2]), 10);
+                    let dex   = parseInt(preciseRound((i - 1) * best2[3] + best1[3]), 10);
+
+                    let fRand = 0;
+                    if (i > 1) {
+                        fRand = petLevelUp(base, stat1);
+                    }
+
+                    let vital1 = parseInt(preciseRound((stat1[0] * 4.0 + stat1[1] + stat1[2] + stat1[3]) / 100), 10);
+                    let str1   = parseInt(preciseRound(((stat1[0] * 0.1) + stat1[1] + (stat1[2] * 0.1) + (stat1[3] * 0.05)) / 100), 10);
+                    let tgh1   = parseInt(preciseRound(((stat1[0] * 0.1) + (stat1[1] * 0.1) + stat1[2] + (stat1[3] * 0.05)) / 100), 10);
+                    let dex1   = parseInt(preciseRound(stat1[3] / 100), 10);
+
+                    let cName = "";
+                    if (i > 1 && fRand >= 515) {
+                        cName = "info";
+                    }
+                    else if (i > 1 && fRand <= 475) {
+                        cName = "danger";
+                    }
+
+                    $('#detail tbody').append(''
+                        + '<tr class="' + cName + '">'
+                        + '<td>' + buttonId + '</td>'
+                        + '<td>' + i + '</td>'
+                        + '<td>' + vital1 + '(' + (vital1 - vital) + ')</td>'
+                        + '<td>' + str1   + '(' + (str1   - str)   + ')</td>'
+                        + '<td>' + tgh1   + '(' + (tgh1   - tgh)   + ')</td>'
+                        + '<td>' + dex1   + '(' + (dex1   - dex)   + ')</td>'
+                        + '<td>' + fRand  + '</td>'
+                        + '</tr>'
+                    );
+                    content       = {"rank": "", "level": "", "vital": "", "str": "", "tgh": "", "dex": "", "fRand": ""};
+                    content.rank  = buttonId;
+                    content.level = i;
+                    content.vital = vital1 + '(' + (vital1 - vital) + ')';
+                    content.str   = str1   + '(' + (str1   - str)   + ')';
+                    content.tgh   = tgh1   + '(' + (tgh1   - tgh)   + ')';
+                    content.dex   = dex1   + '(' + (dex1   - dex)   + ')';
+                    content.fRand = fRand;
+                    detail.push(content);
+                    
+                    if (i == maxLevel) {
+                        $('#results tbody').prepend(''
+                            + '<tr class="srank">'
+                            + '<td>' + buttonId + '</td>'    
+                            + '<td>' + i + '</td>'
+                            + '<td>' + vital1 + '(' + (vital1 - vital) + ')</td>'
+                            + '<td>' + str1   + '(' + (str1   - str)   + ')</td>'
+                            + '<td>' + tgh1   + '(' + (tgh1   - tgh)   + ')</td>'
+                            + '<td>' + dex1   + '(' + (dex1   - dex)   + ')</td>'
+                            + '<td>' + preciseRound(FRAND  / (maxLevel - 1)).toFixed(2) + '</td>'
+                            + '</tr>'
+                        );
+                        console.log(`${i}: ${vital1}(${vital1 - vital}), ${str1}(${str1 - str}), ${tgh1}(${tgh1 - tgh}), ${dex1}(${dex1 - dex})`);
+                        
+                        if (maxLevel > 1) {
+                            $('#detail tbody').append(''
+                                + '<tr class="srank">'
+                                + '<td>' + '</td>'
+                                + '<td>' + '</td>'
+                                + '<td>' + preciseRound(FVITAL / (maxLevel - 1)).toFixed(2) + '</td>'
+                                + '<td>' + preciseRound(FSTR   / (maxLevel - 1)).toFixed(2) + '</td>'
+                                + '<td>' + preciseRound(FTGH   / (maxLevel - 1)).toFixed(2) + '</td>'
+                                + '<td>' + preciseRound(FDEX   / (maxLevel - 1)).toFixed(2) + '</td>'
+                                + '<td>' + preciseRound(FRAND  / (maxLevel - 1)).toFixed(2) + '</td>'
+                                + '</tr>'
+                            );
+                            content       = {"rank": "", "level": "", "vital": "", "str": "", "tgh": "", "dex": "", "fRand": ""};
+                            content.vital = preciseRound(FVITAL / (maxLevel - 1)).toFixed(2);
+                            content.str   = preciseRound(FSTR   / (maxLevel - 1)).toFixed(2);
+                            content.tgh   = preciseRound(FTGH   / (maxLevel - 1)).toFixed(2);
+                            content.dex   = preciseRound(FDEX   / (maxLevel - 1)).toFixed(2);
+                            content.fRand = preciseRound(FRAND  / (maxLevel - 1)).toFixed(2);
+                            detail.push(content);
+                            console.log(`RAND: ${preciseRound(FRAND / (maxLevel - 1))}, VITAL: ${preciseRound(FVITAL / (maxLevel - 1))}, STR: ${preciseRound(FSTR / (maxLevel - 1))}, TGH: ${preciseRound(FTGH / (maxLevel - 1))}, DEX: ${preciseRound(FDEX / (maxLevel - 1))}`);
+                        }
+                        results.push(detail);
+                        detail = [];
+                    }
+                }
+            });
+
+            $(document).on("click", "#results tbody tr", function() {
+                var index = $(this).index(); // 클릭한 tr의 순서를 가져옴
+                var actualIndex = results.length - 1 - index; // 배열의 역순 인덱스를 계산
+                $("#detail tbody").empty();
+                detail = results[actualIndex]; // 계산된 역순 인덱스로 결과 가져옴
+                for (let i = 0; i < detail.length; i++) {
+                    let cName = "";
+                    if (i > 0 && detail[i].fRand >= 515) {
+                        cName = "info";
+                    }
+                    else if (i > 0 && detail[i].fRand <= 475) {
+                        cName = "danger";
+                    }
+                    $('#detail tbody').append(''
+                        + '<tr class="' + cName + '">'
+                        + '<td>' + detail[i].rank  + '</td>'
+                        + '<td>' + detail[i].level + '</td>'
+                        + '<td>' + detail[i].vital + '</td>'
+                        + '<td>' + detail[i].str   + '</td>'
+                        + '<td>' + detail[i].tgh   + '</td>'
+                        + '<td>' + detail[i].dex   + '</td>'
+                        + '<td>' + detail[i].fRand + '</td>'
+                        + '</tr>'
+                    );
+                }
+                detail = [];
+            });
+
+            // 5분마다 업데이트 여부를 확인
+            setInterval(checkUpdateExists, 1000 * 60 * 5);
+
+            // 사용자가 버튼을 클릭하면 문서 상단으로 스크롤
+            var btnTop = document.getElementById("btnTop");
+            $("#btnTop").on("click", function() {
+                document.body.scrollTop = 0;
+                document.documentElement.scrollTop = 0;
+            });
+        });
+    </script>
+</head>
+<body>
+    <div class="container">
+        <h2>Simulator Pet Level Up</h2>
+        <hr>
+        <a href="https://happy01.net/bbs/board.php?bo_table=board23" target="_blank"><h4>Happy Server</h4></a>
+        <!--<a href="https://leejoonwhan.github.io/stoneage/happy/happy.html" target="_blank"><h4>Happy Server Pet Info</h4></a>-->
+        <a href="https://leejoonwhan.github.io/stoneage/happy/petrank.html" target="_blank"><h4>Happy Server Pet Rank Info</h4></a>
+        <a href="https://leejoonwhan.github.io/stoneage/happy/reverse.html" target="_blank"><h4>Happy Server Pet Reverse Info</h4></a>
+        <a href="https://leejoonwhan.github.io/stoneage/simulator/petlevelup.html" target="_blank"><h4>Simulator Pet Level Up</h4></a>
+        <a href="https://hits.seeyoufarm.com"><img src="https://hits.seeyoufarm.com/api/count/incr/badge.svg?url=https%3A%2F%2Fleejoonwhan.github.io%2Fstoneage%2Fsimulator%2Fpetlevelup.html&count_bg=%2379C83D&title_bg=%23555555&icon=&icon_color=%23E7E7E7&title=hits&edge_flat=false"/></a>
+        <p class="text-right" id="ver"></p>
+        <div class="panel panel-danger">
+            <div class="panel-heading"><strong>주의사항</strong></div>
+            <div class="panel-body">
+                본 웹사이트에서 제공하는 계산기 프로그램은 사용자 편의를 위해 제작된 도구입니다.<br>
+                이 프로그램은 '해피 서버' 소스 코드가 아닌 오픈 소스 코드(<a href="https://github.com/chuyiwen/chuyiwen_gmsv" target="_blank">https://github.com/chuyiwen/chuyiwen_gmsv</a>)를 참고하여 개발되었으며, 따라서 결과의 정확성과 신뢰성에 대해 보장하지 않습니다. <code>이 프로그램을 사용하여 발생할 수 있는 어떠한 손해나 피해에 대해서도 제작자는 책임지지 않음을 알려드립니다.</code><br>
+                사용자는 본 프로그램을 이용할 때 결과를 신중하게 검토하시기 바랍니다.
+            </div>
+        </div>
+        <div class="panel panel-primary">
+            <div class="panel-heading"><strong>안내사항</strong></div>
+            <div class="panel-body">
+                - 시뮬레이션의 목적은 7등급과 8등급(환각)의 비교를 통해, 초보자도 육성 중인 페트의 등급을 대략적으로 예측할 수 있도록 돕는 것입니다.<br>
+                - 본 시뮬레이션에 사용되는 샘플 페트는 반기노(2)(3)(2)(3) 입니다.<br>
+                - 시뮬레이션 된 결과와 육성 중인 페트의 ± 수치가 동일하다고 환각을 보장하는 것은 절대 아니니 참고만 하시기 바랍니다.<br>
+            </div>
+        </div>
+        <div class="form-inline form-group">
+            <div class="input-group">
+                <div class="input-group-addon">Lv</div>
+                <input type="number" class="form-control" id="input-level" placeholder="140" value="140">
+                <!-- <div class="input-group-addon">.00</div> -->
+            </div>
+            <button type="button" class="btn btn-primary" data-id="rank8">8등급(환각)</button>
+            <button type="button" class="btn btn-danger"  data-id="rank7vital">7등급(내구력[1])</button>
+            <button type="button" class="btn btn-danger"  data-id="rank7str">7등급(공격력[1])</button>
+            <button type="button" class="btn btn-danger"  data-id="rank7tgh">7등급(방어력[1])</button>
+            <button type="button" class="btn btn-danger"  data-id="rank7dex">7등급(순발력[1])</button>
+        </div>
+        <div class="table-responsive panel panel-default table-wrapper" id="results">
+            <div class="panel-heading"><strong>시뮬레이션 내역</strong></div>
+            <table class="table table-striped">
+                <colgroup>
+                    
+                </colgroup>
+                <thead>
+                    <tr>
+                        <th>등급</th>
+                        <th>레벨</th>
+                        <th>내구력</th>
+                        <th>공격력</th>
+                        <th>방어력</th>
+                        <th>순발력</th>
+                        <th>주사위</th>
+                    </tr>
+                </thead>
+                <tbody>
+                </tbody>
+            </table>
+        </div>
+
+        <div class="table-responsive panel panel-success" id="detail">
+            <div class="panel-heading"><strong>시뮬레이션</strong></div>
+            <table class="table table-striped">
+                <colgroup>
+                    
+                </colgroup>
+                <thead>
+                    <tr>
+                        <th>등급</th>
+                        <th>레벨</th>
+                        <th>내구력</th>
+                        <th>공격력</th>
+                        <th>방어력</th>
+                        <th>순발력</th>
+                        <th>주사위</th>
+                    </tr>
+                </thead>
+                <tbody>
+                </tbody>
+            </table>
+        </div>
+    </div>
+    <button id="btnTop" title="Go to top">Top</button>
+    <br>
+    <br>
+    <br>
+    <br>
+</div>
+</body>
+</html>
