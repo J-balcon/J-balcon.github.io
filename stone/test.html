@@ -3,38 +3,55 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>펫 검색 시스템</title>
+    <title>Happy Server Pet Info</title>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/js/bootstrap.min.js"></script>
     <style>
-        body {
-            font-family: Arial, sans-serif;
-            text-align: center;
-            margin: 20px;
+        body { cursor: default; }
+        #btnTop {
+            display: none;
+            position: fixed;
+            bottom: 20px;
+            right: 30px;
+            z-index: 99;
+            font-size: 18px;
+            border: none;
+            outline: none;
+            background-color: red;
+            color: white;
+            cursor: pointer;
+            padding: 15px;
+            border-radius: 4px;
         }
-
-        input {
+        #btnTop:hover {
+            background-color: #555;
+        }
+        .search-container {
+            margin: 20px auto;
+            width: 80%;
+            text-align: center;
+        }
+        .search-input {
             width: 60%;
             padding: 10px;
             font-size: 16px;
-            margin-bottom: 10px;
         }
-
         #searchResults {
             width: 60%;
             margin: 0 auto;
+            background: #fff;
             border: 1px solid #ddd;
             max-height: 200px;
             overflow-y: auto;
-            background: #fff;
         }
-
         #searchResults p {
-            margin: 0;
             padding: 10px;
+            margin: 0;
             border-bottom: 1px solid #ddd;
             cursor: pointer;
             transition: background 0.3s;
         }
-
         #searchResults p:hover {
             background: #f0f0f0;
         }
@@ -42,41 +59,46 @@
 </head>
 <body>
 
-    <h2>펫 검색</h2>
-    <input type="text" id="searchInput" placeholder="펫 이름을 입력하세요..." oninput="searchPet()">
-    <div id="searchResults"></div>
+    <div class="container">
+        <h2>펫 검색</h2>
+        <div class="search-container">
+            <input type="text" id="searchInput" class="search-input" placeholder="펫 이름을 입력하세요..." oninput="searchPet()">
+            <div id="searchResults"></div>
+        </div>
+    </div>
 
     <script>
-        // 펫 데이터 배열
         var pet = [
-            {"name":"우리"}, {"name":"두리"}, {"name":"얼룩우리"}, {"name":"불그리"},
-            {"name":"실버우리"}, {"name":"환생얼룩우리"}, {"name":"복우리"}, {"name":"푸우리"},
-            {"name":"꼬미"}, {"name":"꼬비"}, {"name":"푸미"}, {"name":"푸푸"},
-            {"name":"베론"}, {"name":"부비"}, {"name":"푸이"}, {"name":"푸투"},
-            {"name":"포포"}, {"name":"푸비"}, {"name":"푸고고"}, {"name":"꼬비오"}
+            {"name":"우리","initnum":10,"hp":20,"atk":12,"def":15,"agi":25},
+            {"name":"두리","initnum":20,"hp":22,"atk":23,"def":11,"agi":23},
+            {"name":"얼룩우리","initnum":15,"hp":22,"atk":17,"def":19,"agi":17},
+            {"name":"불그리","initnum":10,"hp":25,"atk":23,"def":19,"agi":33},
+            {"name":"실버우리","initnum":20,"hp":22,"atk":22,"def":24,"agi":27},
+            {"name":"환생얼룩우리","initnum":25,"hp":30,"atk":24,"def":27,"agi":24},
+            {"name":"복우리","initnum":21,"hp":21,"atk":19,"def":19,"agi":28},
+            {"name":"푸우리","initnum":21,"hp":25,"atk":27,"def":11,"agi":25},
+            {"name":"꼬미","initnum":22,"hp":22,"atk":28,"def":15,"agi":27},
+            {"name":"푸미","initnum":22,"hp":27,"atk":31,"def":16,"agi":25}
         ];
 
         function searchPet() {
             let query = document.getElementById("searchInput").value.trim();
             let resultContainer = document.getElementById("searchResults");
-
-            // 검색 결과 초기화
-            resultContainer.innerHTML = "";
+            
+            resultContainer.innerHTML = ""; // 기존 검색 결과 초기화
 
             if (query === "") return; // 검색어가 없으면 종료
 
-            // 검색어를 포함하는 펫 찾기
-            let results = pet.filter(p => p.name.includes(query));
-
-            // 검색된 결과를 화면에 출력
+            let results = pet.filter(p => p.name.includes(query)); // 부분 검색
+            
             results.forEach(p => {
                 let pElement = document.createElement("p");
                 pElement.textContent = p.name;
-                
-                // 검색된 항목 클릭 시 input에 값 설정
+
+                // 클릭하면 검색창에 입력 & 리스트 삭제
                 pElement.addEventListener("click", function() {
                     document.getElementById("searchInput").value = p.name;
-                    resultContainer.innerHTML = ""; // 검색 결과 초기화
+                    resultContainer.innerHTML = ""; 
                 });
 
                 resultContainer.appendChild(pElement);
