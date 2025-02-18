@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>펫 검색 시스템</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            margin: 20px;
+        }
+
+        input {
+            width: 60%;
+            padding: 10px;
+            font-size: 16px;
+            margin-bottom: 10px;
+        }
+
+        #searchResults {
+            width: 60%;
+            margin: 0 auto;
+            border: 1px solid #ddd;
+            max-height: 200px;
+            overflow-y: auto;
+            background: #fff;
+        }
+
+        #searchResults p {
+            margin: 0;
+            padding: 10px;
+            border-bottom: 1px solid #ddd;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+
+        #searchResults p:hover {
+            background: #f0f0f0;
+        }
+    </style>
+</head>
+<body>
+
+    <h2>펫 검색</h2>
+    <input type="text" id="searchInput" placeholder="펫 이름을 입력하세요..." oninput="searchPet()">
+    <div id="searchResults"></div>
+
+    <script>
+        // 펫 데이터 배열
+        var pet = [
+            {"name":"우리"}, {"name":"두리"}, {"name":"얼룩우리"}, {"name":"불그리"},
+            {"name":"실버우리"}, {"name":"환생얼룩우리"}, {"name":"복우리"}, {"name":"푸우리"},
+            {"name":"꼬미"}, {"name":"꼬비"}, {"name":"푸미"}, {"name":"푸푸"},
+            {"name":"베론"}, {"name":"부비"}, {"name":"푸이"}, {"name":"푸투"},
+            {"name":"포포"}, {"name":"푸비"}, {"name":"푸고고"}, {"name":"꼬비오"}
+        ];
+
+        function searchPet() {
+            let query = document.getElementById("searchInput").value.trim();
+            let resultContainer = document.getElementById("searchResults");
+
+            // 검색 결과 초기화
+            resultContainer.innerHTML = "";
+
+            if (query === "") return; // 검색어가 없으면 종료
+
+            // 검색어를 포함하는 펫 찾기
+            let results = pet.filter(p => p.name.includes(query));
+
+            // 검색된 결과를 화면에 출력
+            results.forEach(p => {
+                let pElement = document.createElement("p");
+                pElement.textContent = p.name;
+                
+                // 검색된 항목 클릭 시 input에 값 설정
+                pElement.addEventListener("click", function() {
+                    document.getElementById("searchInput").value = p.name;
+                    resultContainer.innerHTML = ""; // 검색 결과 초기화
+                });
+
+                resultContainer.appendChild(pElement);
+            });
+        }
+    </script>
+
+</body>
+</html>
