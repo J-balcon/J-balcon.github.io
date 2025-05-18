@@ -1,37 +1,37 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-	<title>Happy Server Pet Info</title>
-	<meta charset="utf-8">
-	<meta name="viewport" content="width=device-width, initial-scale=1">
-	<link rel="stylesheet" href="https://web.archive.org/web/20240908083213cs_/https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css">
-	<script src="https://web.archive.org/web/20240908083213js_/https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
-	<script src="https://web.archive.org/web/20240908083213js_/https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/js/bootstrap.min.js"></script>
-	<style>
-		body { cursor: default; }
-		#btnTop {
-		  display: none;
-		  position: fixed;
-		  bottom: 20px;
-		  right: 30px;
-		  z-index: 99;
-		  font-size: 18px;
-		  border: none;
-		  outline: none;
-		  background-color: red;
-		  color: white;
-		  cursor: pointer;
-		  padding: 15px;
-		  border-radius: 4px;
-		}
+    <title>Happy Server Pet Info</title>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/js/bootstrap.min.js"></script>
+    <style>
+        body { cursor: default; }
+        #btnTop {
+          display: none;
+          position: fixed;
+          bottom: 20px;
+          right: 30px;
+          z-index: 99;
+          font-size: 18px;
+          border: none;
+          outline: none;
+          background-color: red;
+          color: white;
+          cursor: pointer;
+          padding: 15px;
+          border-radius: 4px;
+        }
 
-		#btnTop:hover {
-		  background-color: #555;
-		}
-		.searchValue {
+        #btnTop:hover {
+          background-color: #555;
+        }
+        .searchValue {
             display: inline;
             width: 100px;
-		}
+        }
 
         /* 최소 너비 지정 */
         .min-width-td-120 {
@@ -41,12 +41,12 @@
         .min-width-td-80 {
             min-width: 80px; /* 원하는 최소 너비로 조정 */
         }
-    
-		.green { color: #fff; background-color: #5cb85c;}
-		.blue { color: #fff; background-color: #337ab7;}
-		.red { color: #fff; background-color: #d9534f;}
-		.yellow { color: #fff; background-color: #f0ad4e;}
-	</style>
+
+        .green { color: #fff; background-color: #5cb85c;}
+        .blue { color: #fff; background-color: #337ab7;}
+        .red { color: #fff; background-color: #d9534f;}
+        .yellow { color: #fff; background-color: #f0ad4e;}
+    </style>
     <script>
         var pet = [
             {"name":"우리","initnum":10,"hp":20,"atk":12,"def":15,"agi":25},
