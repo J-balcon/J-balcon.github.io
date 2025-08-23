@@ -991,7 +991,7 @@
                 for (var key in countMap) {
                     if (countMap.hasOwnProperty(key)) {
                         var count = countMap[key];
-                        var percentage = (count / totalCount * 100).toFixed(2); // 백분율 계산 및 소수점 이하 두 자리까지만 표시
+                        var percentage = (count / totalCount * 100).toFixed(3); // 백분율 계산 및 소수점 이하 두 자리까지만 표시
                         //message += key + ' ' + countMap[key] + '건 (' + percentage + '%)\n';
                         var arrStat = {};
                         arrStat['key'] = key;
@@ -1045,7 +1045,7 @@
                 const totalCount = Object.keys(rankCounts).reduce((acc, rank) => acc + rankCounts[rank], 0);
                 for (const rank of ranks) {
                     const count = rankCounts[rank];
-                    const percentage = (count / totalCount * 100).toFixed(2); // 소수점 둘째 자리까지 표시
+                    const percentage = (count / totalCount * 100).toFixed(3); // 소수점 둘째 자리까지 표시
                     message += `${rank} 등급: ${count} 건 (${percentage}%) \n`;
                 }
             }
@@ -1408,4 +1408,5 @@ __wm.bt(750,27,25,2,"web","https://leejoonwhan.github.io/stoneage/happy/petrank.
 </div>
 </body>
 </html>
+
 
