@@ -681,6 +681,7 @@
             {"name":"마그북","initnum":25,"hp":39,"atk":36,"def":37,"agi":4},
             {"name":"그린바로스","initnum":23,"hp":32,"atk":44,"def":18,"agi":24},
             {"name":"바로스","initnum":24,"hp":29,"atk":39,"def":17,"agi":31},
+            {"name":"루비","initnum":23,"hp":40,"atk":39,"def":33,"agi":5},
             
         ];
 
@@ -768,19 +769,19 @@
             $('#myPet tbody').append(''
                 + '<tr class="srank">'
                 + '<td>S 초기치</td>'
-                + '<td>' + limitDecimalPlaces(resultHp, 3) + '</td>'
-                + '<td>' + limitDecimalPlaces(resultAtk, 3) + '</td>'
-                + '<td>' + limitDecimalPlaces(resultDef, 3) + '</td>'
-                + '<td>' + limitDecimalPlaces(resultAgi, 3) + '</td>'
+                + '<td>' + limitDecimalPlaces(resultHp, 4) + '</td>'
+                + '<td>' + limitDecimalPlaces(resultAtk, 4) + '</td>'
+                + '<td>' + limitDecimalPlaces(resultDef, 4) + '</td>'
+                + '<td>' + limitDecimalPlaces(resultAgi, 4) + '</td>'
                 + '<td>' + '' + '</td>'
                 + '</tr>'
                 + '<tr class="srank">'
                 + '<td>S 성장률</td>'
-                + '<td>' + resultUpHp.toFixed(3) + '</td>'
-                + '<td>' + resultUpAtk.toFixed(3) + '</td>'
-                + '<td>' + resultUpDef.toFixed(3) + '</td>'
-                + '<td>' + resultUpAgi.toFixed(3) + '</td>'
-                + '<td>' + resultSum.toFixed(3) + '</td>'
+                + '<td>' + resultUpHp.toFixed(4) + '</td>'
+                + '<td>' + resultUpAtk.toFixed(4) + '</td>'
+                + '<td>' + resultUpDef.toFixed(4) + '</td>'
+                + '<td>' + resultUpAgi.toFixed(4) + '</td>'
+                + '<td>' + resultSum.toFixed(4) + '</td>'
                 + '</tr>'
             );
 
@@ -991,7 +992,7 @@
                 for (var key in countMap) {
                     if (countMap.hasOwnProperty(key)) {
                         var count = countMap[key];
-                        var percentage = (count / totalCount * 100).toFixed(3); // 백분율 계산 및 소수점 이하 두 자리까지만 표시
+                        var percentage = (count / totalCount * 100).toFixed(4); // 백분율 계산 및 소수점 이하 두 자리까지만 표시
                         //message += key + ' ' + countMap[key] + '건 (' + percentage + '%)\n';
                         var arrStat = {};
                         arrStat['key'] = key;
@@ -1045,7 +1046,7 @@
                 const totalCount = Object.keys(rankCounts).reduce((acc, rank) => acc + rankCounts[rank], 0);
                 for (const rank of ranks) {
                     const count = rankCounts[rank];
-                    const percentage = (count / totalCount * 100).toFixed(3); // 소수점 둘째 자리까지 표시
+                    const percentage = (count / totalCount * 100).toFixed(4); // 소수점 둘째 자리까지 표시
                     message += `${rank} 등급: ${count} 건 (${percentage}%) \n`;
                 }
             }
@@ -1408,6 +1409,7 @@ __wm.bt(750,27,25,2,"web","https://leejoonwhan.github.io/stoneage/happy/petrank.
 </div>
 </body>
 </html>
+
 
 
 
