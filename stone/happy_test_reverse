@@ -1,1 +1,234 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+	<title>Happy Server Reverse Info - 정밀 계산 버전</title>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css">
+	<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+	<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/js/bootstrap.min.js"></script>
+	<style>
+		body { cursor: default; font-family: 'Malgun Gothic', sans-serif; }
+		#btnTop {
+		  display: none; position: fixed; bottom: 20px; right: 30px; z-index: 99;
+		  font-size: 18px; border: none; outline: none; background-color: red;
+		  color: white; cursor: pointer; padding: 15px; border-radius: 4px;
+		}
+		#btnTop:hover { background-color: #555; }
+		.searchValue { display: inline; width: 100px; }
+		.table th { background-color: #f9f9f9; text-align: center; }
+		.table td { text-align: center; vertical-align: middle !important; }
+		.result-row { background-color: #e8f5e9 !important; font-weight: bold; }
+	</style>
+	<script>
+        let stop = false;
 
+        // 스크롤 제어
+		window.onscroll = function() {scrollFunction()};
+		function scrollFunction() {
+            const btn = document.getElementById("btnTop");
+			if (document.body.scrollTop > 50 || document.documentElement.scrollTop > 50) {
+				btn.style.display = "block";
+			} else {
+				btn.style.display = "none";
+			}
+		}
+
+        // 부동 소수점 오차 보정 함수
+        function precise(num) {
+            return Math.round((num + Number.EPSILON) * 1e10) / 1e10;
+        }
+
+        function getBase() {
+            stop = false;
+            const statHp  = parseInt($("#statHp").val());
+            const statAtk = parseInt($("#statAtk").val());
+            const statDef = parseInt($("#statDef").val());
+            const statAgi = parseInt($("#statAgi").val());
+
+            const upHp    = parseFloat($("#upHp").val());
+            const upAtk   = parseFloat($("#upAtk").val());
+            const upDef   = parseFloat($("#upDef").val());
+            const upAgi   = parseFloat($("#upAgi").val());
+
+            if (isNaN(statHp) || isNaN(upHp)) {
+                alert("S급 초기치와 성장률을 모두 입력해주세요.");
+                return;
+            }
+
+            // 검색 시작
+            for (let i = 10; i <= 35; i++) { // initnum
+                for (let agiVal = 0; agiVal <= 60; agiVal++) {
+                    const baseAgiVal = (i * (agiVal + 4.5)) / 100;
+                    // Agi 정수값이 맞는지 1차 필터링
+                    if (Math.floor(precise(baseAgiVal)) === statAgi) {
+                        
+                        for (let hpVal = 0; hpVal <= 60; hpVal++) {
+                            const h = (i * (hpVal + 4.5)) / 100;
+                            for (let atkVal = 0; atkVal <= 60; atkVal++) {
+                                const a = (i * (atkVal + 4.5)) / 100;
+                                for (let defVal = 0; defVal <= 60; defVal++) {
+                                    const d = (i * (defVal + 4.5)) / 100;
+
+                                    // 초기치 정수값 검증
+                                    const curHp = Math.floor(precise((h * 4) + a + d + baseAgiVal));
+                                    const curAtk = Math.floor(precise((h * 0.1) + a + (d * 0.1) + (baseAgiVal * 0.05)));
+                                    const curDef = Math.floor(precise((h * 0.1) + (a * 0.1) + d + (baseAgiVal * 0.05)));
+
+                                    if (curHp === statHp && curAtk === statAtk && curDef === statDef) {
+                                        // 성장률 Rank 검증 (입력된 성장률 소수점 2자리와 일치하는지)
+                                        const ranks = [435, 455, 475, 495, 515, 535, 555, 575];
+                                        for (let r of ranks) {
+                                            const uH = (hpVal + 4.5) * r / 10000;
+                                            const uA = (atkVal + 4.5) * r / 10000;
+                                            const uD = (defVal + 4.5) * r / 10000;
+                                            const uG = (agiVal + 4.5) * r / 10000;
+
+                                            const totalUpHp = (uH * 4) + uA + uD + uG;
+                                            const totalUpAtk = (uH * 0.1) + uA + (uD * 0.1) + (uG * 0.05);
+                                            const totalUpDef = (uH * 0.1) + (uA * 0.1) + uD + (uG * 0.05);
+
+                                            if (precise(totalUpHp).toFixed(2) == upHp.toFixed(2) &&
+                                                precise(totalUpAtk).toFixed(2) == upAtk.toFixed(2) &&
+                                                precise(totalUpDef).toFixed(2) == upDef.toFixed(2) &&
+                                                precise(uG).toFixed(2) == upAgi.toFixed(2)) {
+                                                
+                                                const baseData = {initnum: i, hp: hpVal, atk: atkVal, def: defVal, agi: agiVal, rank: r};
+                                                const resultData = {
+                                                    hp: precise((h * 4) + a + d + baseAgiVal),
+                                                    atk: precise((h * 0.1) + a + (d * 0.1) + (baseAgiVal * 0.05)),
+                                                    def: precise((h * 0.1) + (a * 0.1) + d + (baseAgiVal * 0.05)),
+                                                    agi: precise(baseAgiVal),
+                                                    upHp: precise(totalUpHp),
+                                                    upAtk: precise(totalUpAtk),
+                                                    upDef: precise(totalUpDef),
+                                                    upAgi: precise(uG)
+                                                };
+                                                printResult1(baseData, resultData);
+                                                stop = true; break;
+                                            }
+                                        }
+                                    }
+                                    if (stop) break;
+                                }
+                                if (stop) break;
+                            }
+                            if (stop) break;
+                        }
+                    }
+                    if (stop) break;
+                }
+                if (stop) break;
+            }
+            if (!stop) alert("일치하는 데이터를 찾을 수 없습니다. 입력값을 확인해주세요.");
+        }
+
+        function printResult1(base, res) {
+            $(".result1-dynamic").remove();
+            $('#base tbody').append(`
+                <tr class="result1-dynamic result-row">
+                    <td>계산 베이스</td>
+                    <td colspan="5">B: ${base.initnum} / HP: ${base.hp} / ATK: ${base.atk} / DEF: ${base.def} / AGI: ${base.agi} / Rank: ${base.rank}</td>
+                </tr>
+                <tr class="result1-dynamic">
+                    <td>계산 초기치</td>
+                    <td>${res.hp.toFixed(3)}</td>
+                    <td>${res.atk.toFixed(3)}</td>
+                    <td>${res.def.toFixed(3)}</td>
+                    <td>${res.agi.toFixed(3)}</td>
+                    <td>-</td>
+                </tr>
+                <tr class="result1-dynamic">
+                    <td>계산 성장률</td>
+                    <td>${res.upHp.toFixed(2)}</td>
+                    <td>${res.upAtk.toFixed(2)}</td>
+                    <td>${res.upDef.toFixed(2)}</td>
+                    <td>${res.upAgi.toFixed(2)}</td>
+                    <td>${(res.upAtk + res.upDef + res.upAgi).toFixed(2)}</td>
+                </tr>
+            `);
+            
+            $("#baseinitnum").val(base.initnum);
+            $("#baseHp").val(base.hp);
+            $("#baseAtk").val(base.atk);
+            $("#baseDef").val(base.def);
+            $("#baseAgi").val(base.agi);
+            $("#baseRank").val(base.rank);
+            alert("계산이 완료되었습니다!");
+        }
+
+		$(document).ready(function() {
+			$("#calculate1").on("click", getBase);
+            $("#btnTop").on("click", function() {
+				window.scrollTo({top: 0, behavior: 'smooth'});
+			});
+        });
+    </script>
+</head>
+<body>
+	<div class="container">
+		<h2>Happy Server Pet Reverse Info</h2>
+		<hr>
+		<div class="panel panel-danger">
+            <div class="panel-heading"><strong>주의사항</strong></div>
+            <div class="panel-body">
+                본 프로그램은 소수점 역산을 통한 참고용 데이터를 제공하며 게임 내 실제 값과 미세한 차이가 있을 수 있습니다.
+            </div>
+        </div>
+
+        <h4>소수점 계산기</h4>
+        <hr>
+		<div class="table-responsive" id="base">
+			<table class="table table-bordered">
+				<thead>
+					<tr>
+						<th>구분</th>
+                        <th>내구력(HP)</th>
+                        <th>공격력(ATK)</th>
+                        <th>방어력(DEF)</th>
+                        <th>순발력(AGI)</th>
+                        <th>실행</th>
+					</tr>
+				</thead>
+				<tbody>
+                    <tr>
+                        <td><strong>S급 초기치</strong></td>
+                        <td><input type="number" class="form-control" id="statHp" placeholder="예: 57"></td>
+                        <td><input type="number" class="form-control" id="statAtk" placeholder="예: 12"></td>
+                        <td><input type="number" class="form-control" id="statDef" placeholder="예: 7"></td>
+                        <td><input type="number" class="form-control" id="statAgi" placeholder="예: 6"></td>
+                        <td></td>
+                    </tr>
+                    <tr>
+                        <td><strong>S급 성장률</strong></td>
+                        <td><input type="number" class="form-control" id="upHp" step="0.01" placeholder="10.47"></td>
+                        <td><input type="number" class="form-source-control" id="upAtk" step="0.01" style="width:100%" placeholder="2.32"></td>
+                        <td><input type="number" class="form-control" id="upDef" step="0.01" placeholder="1.43"></td>
+                        <td><input type="number" class="form-control" id="upAgi" step="0.01" placeholder="1.21"></td>
+                        <td><button type="button" class="btn btn-primary btn-block" id="calculate1">계산하기</button></td>
+                    </tr>
+				</tbody>
+			</table>
+		</div>
+
+        <h4>환각 계산기 (Base 자동입력)</h4>
+        <hr>
+        <div class="table-responsive" id="rank">
+            <table class="table table-striped">
+                <tbody>
+                    <tr>
+                        <td>베이스 정보</td>
+                        <td><input type="number" class="form-control" id="baseinitnum" readonly></td>
+                        <td><input type="number" class="form-control" id="baseHp" readonly></td>
+                        <td><input type="number" class="form-control" id="baseAtk" readonly></td>
+                        <td><input type="number" class="form-control" id="baseDef" readonly></td>
+                        <td><input type="number" class="form-control" id="baseAgi" readonly></td>
+                        <td><input type="number" class="form-control" id="baseRank" readonly></td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+    <button id="btnTop" title="Go to top">Top</button>
+</body>
+</html>
