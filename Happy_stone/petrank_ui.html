@@ -189,6 +189,47 @@
         .blue { color: #fff; background-color: #337ab7;}
         .red { color: #fff; background-color: #d9534f;}
         .yellow { color: #fff; background-color: #f0ad4e;}
+
+        /* 레이아웃: 본문 + 우측 고정 패널 */
+        .layout {
+            display: flex;
+            align-items: flex-start;
+            gap: 20px;
+        }
+        .main-col { flex: 1; min-width: 0; }
+
+        /* 사이드 패널 (항상 표시) */
+        #sidePanel {
+            position: sticky;
+            top: 20px;
+            width: 340px;
+            flex-shrink: 0;
+            max-height: calc(100vh - 40px);
+            background: #fff;
+            border-radius: 8px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+            display: flex;
+            flex-direction: column;
+        }
+        #sidePanelHeader {
+            padding: 14px 16px;
+            background: #337ab7;
+            color: #fff;
+            border-radius: 8px 8px 0 0;
+        }
+        #sidePanelHeader h4 { margin: 0; font-size: 15px; }
+        #sidePanelBody {
+            padding: 16px;
+            overflow-y: auto;
+            white-space: pre-wrap;
+            font-size: 13px;
+            line-height: 1.6;
+            color: #999;
+        }
+        @media (max-width: 900px) {
+            .layout { flex-direction: column; }
+            #sidePanel { position: static; width: 100%; max-height: none; }
+        }
     </style>
     <script>
         var pet = [];
@@ -631,9 +672,13 @@
                 }
             }
             
-            alert(message);
+            showSidePanel(message);
             //$("#search").attr("disabled", false);
             //$("#calculate").attr("disabled", false);
+        }
+
+        function showSidePanel(message) {
+            $("#sidePanelBody").css("color", "#333").text(message);
         }
 
         // 각 랭크별 맹독 출력
@@ -942,6 +987,7 @@
 
             // 사용자가 버튼을 클릭하면 문서 상단으로 스크롤
             var btnTop = document.getElementById("btnTop");
+
             $("#btnTop").on("click", function() {
                 document.body.scrollTop = 0;
                 document.documentElement.scrollTop = 0;
@@ -953,6 +999,8 @@
 <body>
     <div class="container">
         <h2>Happy Server Pet Rank Info</h2>
+        <div class="layout">
+        <div class="main-col">
 
         <div class="link-bar">
             <a href="https://happy02.net/" target="_blank"><h4>Happy Server</h4></a>
@@ -1102,12 +1150,17 @@
             </table>
         </div>
         </div>
+        </div>
+
+        </div>
+        <div id="sidePanel">
+            <div id="sidePanelHeader">
+                <h4>결과</h4>
+            </div>
+            <div id="sidePanelBody">계산/검색 결과가 여기에 표시됩니다.</div>
+        </div>
+        </div>
     </div>
     <button id="btnTop" title="Go to top">Top</button>
-    <br>
-    <br>
-    <br>
-    <br>
-</div>
 </body>
 </html>
