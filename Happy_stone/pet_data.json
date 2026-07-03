@@ -639,5 +639,12 @@
     {"name":"흑파카"         , "initnum":24, "hp":42, "atk":33, "def":37, "agi":7},
     {"name":"테이토스"        , "initnum":24, "hp":51, "atk":32, "def":36, "agi":6},
     {"name":"테르가"         , "initnum":25, "hp":28, "atk":40, "def":13, "agi":34},
-    {"name":"하라비스"        , "initnum":26, "hp":25, "atk":32, "def":12, "agi":30}
+    {"name":"하라비스"        , "initnum":26, "hp":25, "atk":32, "def":12, "agi":30},
+    {"name":"블루문"         , "initnum":25, "hp":30, "atk":39, "def":17, "agi":28},
+    {"name":"한복메이"        , "initnum":26, "hp":27, "atk":39, "def":19, "agi":23},
+    {"name":"크토돈"         , "initnum":24, "hp":29, "atk":43, "def":15, "agi":28},
+    {"name":"테이노스"        , "initnum":23, "hp":35, "atk":42, "def":19, "agi":24},
+    {"name":"땅뱀"          , "initnum":25, "hp":28, "atk":36, "def":17, "agi":24},
+    {"name":"타이쿠스"        , "initnum":23, "hp":42, "atk":37, "def":37, "agi":3},
+    {"name":"무마"          , "initnum":24, "hp":28, "atk":36, "def":12, "agi":38}
 ]
