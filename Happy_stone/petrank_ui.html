@@ -1,0 +1,1113 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>Happy Server Pet Info</title>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <script type="text/javascript" nonce="c9057a78c0af4462bd4bc57a637" src="//local.adguard.org?ts=1742103053589&amp;type=content-script&amp;dmn=files.mybox.naver.com&amp;url=https%3A%2F%2Ffiles.mybox.naver.com%2Ffile%2Fdownload.api%3FresourceKey%3Dc2Nkb251dHN8MzQ3MjU5MTkxMzQwODQ0ODM0OHxGfDA%26NDriveSvcType%3DNHN%252FND-WEB%2520Ver&amp;app=chrome.exe&amp;css=3&amp;js=1&amp;rel=1&amp;rji=1&amp;sbe=1&amp;stealth=1&amp;st-dnt"></script>
+<script type="text/javascript" nonce="c9057a78c0af4462bd4bc57a637" src="//local.adguard.org?ts=1742103053589&amp;name=AdGuard%20Extra&amp;type=user-script"></script><link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/js/bootstrap.min.js"></script>
+    <style>
+        body {
+            cursor: default;
+            background-color: #f4f6f8;
+            padding-bottom: 60px;
+        }
+        .container {
+            max-width: 960px;
+        }
+        h2 { margin-top: 20px; }
+
+        /* 상단 링크 바 */
+        .link-bar {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin: 15px 0;
+        }
+        .link-bar a {
+            text-decoration: none;
+        }
+        .link-bar h4 {
+            margin: 0;
+            padding: 6px 12px;
+            background: #337ab7;
+            color: #fff;
+            border-radius: 4px;
+            font-size: 14px;
+        }
+        .link-bar h4:hover { background: #285a8c; }
+
+        /* 카드 공통 */
+        .card {
+            background: #fff;
+            border-radius: 8px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+        .card > h3 {
+            margin-top: 0;
+            font-size: 17px;
+            border-bottom: 1px solid #eee;
+            padding-bottom: 10px;
+        }
+
+        /* 맹독 등급 카드 */
+        .poison-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 12px;
+        }
+        @media (max-width: 700px) {
+            .poison-grid { grid-template-columns: 1fr; }
+        }
+        .poison-card {
+            border-radius: 6px;
+            padding: 10px 14px;
+            font-size: 13px;
+            max-height: 160px;
+            overflow-y: auto;
+        }
+        .poison-card.tier8 { background: #fdecea; border: 1px solid #f5c6cb; }
+        .poison-card.tier7 { background: #fff4e5; border: 1px solid #ffe0b2; }
+        .poison-card.tier6 { background: #eaf6ff; border: 1px solid #bee5eb; }
+        .poison-card h4 {
+            margin: 0 0 8px 0;
+            font-size: 14px;
+        }
+        .poison-card footer {
+            display: block;
+            padding: 2px 0;
+        }
+
+        /* 입력 폼 */
+        .search-form {
+            display: flex;
+            flex-wrap: wrap;
+            align-items: flex-end;
+            gap: 10px;
+        }
+        .field-group { display: flex; flex-direction: column; }
+        .field-group label {
+            font-size: 12px;
+            color: #666;
+            margin-bottom: 4px;
+        }
+        .field-group input {
+            width: 90px;
+        }
+        #nameAutocompleteWrap { width: 200px; }
+        #nameAutocompleteWrap input { width: 100%; }
+        .search-form .btn-row {
+            display: flex;
+            gap: 8px;
+        }
+
+        #btnTop {
+          display: none;
+          position: fixed;
+          bottom: 20px;
+          right: 30px;
+          z-index: 99;
+          font-size: 18px;
+          border: none;
+          outline: none;
+          background-color: #d9534f;
+          color: white;
+          cursor: pointer;
+          padding: 12px 16px;
+          border-radius: 50%;
+          box-shadow: 0 2px 6px rgba(0,0,0,0.3);
+        }
+        #btnTop:hover { background-color: #555; }
+
+        /* 이름 자동완성 드롭다운 */
+        #nameAutocompleteWrap { position: relative; }
+        #nameSuggestions {
+            display: none;
+            position: absolute;
+            top: 100%;
+            left: 0;
+            right: 0;
+            z-index: 1000;
+            max-height: 200px;
+            overflow-y: auto;
+            background-color: #fff;
+            border: 1px solid #ccc;
+            border-top: none;
+            border-radius: 0 0 4px 4px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            list-style: none;
+            margin: 0;
+            padding: 0;
+        }
+        #nameSuggestions li {
+            padding: 6px 12px;
+            cursor: pointer;
+        }
+        #nameSuggestions li:hover,
+        #nameSuggestions li.active {
+            background-color: #337ab7;
+            color: #fff;
+        }
+
+        /* S 초기치/성장률 표 강조 */
+        #myPet .srank td:first-child {
+            font-weight: bold;
+            background: #f0f7ff;
+        }
+
+        /* 결과 표 */
+        #result table thead th {
+            position: sticky;
+            top: 0;
+            background: #337ab7;
+            color: #fff;
+            z-index: 2;
+        }
+        #result .table-responsive,
+        #result {
+            max-height: 500px;
+            overflow-y: auto;
+        }
+        #result td.text-danger {
+            font-weight: bold;
+        }
+
+        #memo {
+            font-size: 13px;
+            color: #555;
+            line-height: 1.8;
+        }
+
+        .min-width-td-120 { min-width: 120px; }
+        .min-width-td-80 { min-width: 80px; }
+
+        .green { color: #fff; background-color: #5cb85c;}
+        .blue { color: #fff; background-color: #337ab7;}
+        .red { color: #fff; background-color: #d9534f;}
+        .yellow { color: #fff; background-color: #f0ad4e;}
+    </style>
+    <script>
+        var pet = [];
+        var petDataReady = fetch("pet_data.json").then(function(r) { return r.json(); }).then(function(data) { pet = data; });
+
+        let btnName = "";
+        const result = [];
+
+        // 스크롤
+        // 사용자가 문서 상단에서 50px 아래로 스크롤 할 때 버튼을 표시합니다.
+        window.onscroll = function() {scrollFunction()};
+        function scrollFunction() {
+            if (document.body.scrollTop > 50 || document.documentElement.scrollTop > 50) {
+                btnTop.style.display = "block";
+            } else {
+                btnTop.style.display = "none";
+            }
+        }
+
+        function setSRank(i, copiedPet) {
+
+            let rank = 0;
+            if (copiedPet.rank > 0) {
+                rank = copiedPet.rank;
+            }
+            else if (copiedPet.hp + copiedPet.atk + copiedPet.def + copiedPet.agi >= 110) {
+                rank = 435;
+            }
+            else if (copiedPet.hp + copiedPet.atk + copiedPet.def + copiedPet.agi >= 105) {
+                rank = 455;
+            }
+            else if (copiedPet.hp + copiedPet.atk + copiedPet.def + copiedPet.agi >= 100) {
+                rank = 475;
+            }
+            else if (copiedPet.hp + copiedPet.atk + copiedPet.def + copiedPet.agi >= 95) {
+                rank = 495;
+            }
+            else if (copiedPet.hp + copiedPet.atk + copiedPet.def + copiedPet.agi >= 90) {
+                rank = 515;
+            }
+            else if (copiedPet.hp + copiedPet.atk + copiedPet.def + copiedPet.agi >= 85) {
+                rank = 535;
+            }
+            else if (copiedPet.hp + copiedPet.atk + copiedPet.def + copiedPet.agi >= 80) {
+                rank = 555;
+            }
+            else if (copiedPet.hp + copiedPet.atk + copiedPet.def + copiedPet.agi >= 0) {
+                rank = 575;
+            }
+
+            let nmRank = "";
+            // base
+            if (i == 0) {
+                copiedPet.hp  = copiedPet.hp  + 2;
+                copiedPet.atk = copiedPet.atk + 2;
+                copiedPet.def = copiedPet.def + 2;
+                copiedPet.agi = copiedPet.agi + 2;
+            }
+            else if (i == 1) {
+                nmRank = "7등급 내구력[1]";
+                copiedPet.hp  = copiedPet.hp  + 1;
+                copiedPet.atk = copiedPet.atk + 2;
+                copiedPet.def = copiedPet.def + 2;
+                copiedPet.agi = copiedPet.agi + 2;
+            }
+            else if (i == 2) {
+                nmRank = "7등급 공격력[1]";
+                copiedPet.hp  = copiedPet.hp  + 2;
+                copiedPet.atk = copiedPet.atk + 1;
+                copiedPet.def = copiedPet.def + 2;
+                copiedPet.agi = copiedPet.agi + 2;
+            }
+            else if (i == 3) {
+                nmRank = "7등급 방어력[1]";
+                copiedPet.hp  = copiedPet.hp  + 2;
+                copiedPet.atk = copiedPet.atk + 2;
+                copiedPet.def = copiedPet.def + 1;
+                copiedPet.agi = copiedPet.agi + 2;
+            }
+            else if (i == 4) {
+                nmRank = "7등급 순발력[1]";
+                copiedPet.hp  = copiedPet.hp  + 2;
+                copiedPet.atk = copiedPet.atk + 2;
+                copiedPet.def = copiedPet.def + 2;
+                copiedPet.agi = copiedPet.agi + 1;
+            }
+            
+            // bonus
+            copiedPet.hp  = copiedPet.hp  + 2.5;
+            copiedPet.atk = copiedPet.atk + 2.5;
+            copiedPet.def = copiedPet.def + 2.5;
+            copiedPet.agi = copiedPet.agi + 2.5;
+
+            // 계산
+            const hp  = preciseRound(copiedPet.initnum * copiedPet.hp  / 100);
+            const atk = preciseRound(copiedPet.initnum * copiedPet.atk / 100);
+            const def = preciseRound(copiedPet.initnum * copiedPet.def / 100);
+            const agi = preciseRound(copiedPet.initnum * copiedPet.agi / 100);
+
+            const resultHp  = preciseRound((hp * 4) + atk + def + agi);
+            const resultAtk = preciseRound((hp * 0.1) + atk + (def * 0.1) + (agi * 0.05));
+            const resultDef = preciseRound((hp * 0.1) + (atk * 0.1) + def + (agi * 0.05));
+            const resultAgi = agi;
+
+            const upHp  = preciseRound(copiedPet.hp  * rank / 10000);
+            const upAtk = preciseRound(copiedPet.atk * rank / 10000);
+            const upDef = preciseRound(copiedPet.def * rank / 10000);
+            const upAgi = preciseRound(copiedPet.agi * rank / 10000);
+            
+            const resultUpHp  = preciseRound((upHp * 4) + upAtk + upDef + upAgi);
+            const resultUpAtk = preciseRound((upHp * 0.1) + upAtk + (upDef * 0.1) + (upAgi * 0.05));
+            const resultUpDef = preciseRound((upHp * 0.1) + (upAtk * 0.1) + upDef + (upAgi * 0.05));
+            const resultUpAgi = upAgi;
+            const resultSum   = preciseRound(resultUpAtk + resultUpDef + resultUpAgi);
+
+            // S초기치 및 등급별 성장률 출력
+            if (i == 0) {
+                // 8등급
+                $('#myPet tbody').append(''
+                    + '<tr class="srank">'
+                    + '<td>S 초기치</td>'
+                    + '<td>' + limitDecimalPlaces(resultHp, 2) + '</td>'
+                    + '<td>' + limitDecimalPlaces(resultAtk, 2) + '</td>'
+                    + '<td>' + limitDecimalPlaces(resultDef, 2) + '</td>'
+                    + '<td>' + limitDecimalPlaces(resultAgi, 2) + '</td>'
+                    + '<td>' + '' + '</td>'
+                    + '</tr>'
+                    + '<tr class="srank">'
+                    + '<td>S 성장률</td>'
+                    + '<td>' + resultUpHp.toFixed(2) + '</td>'
+                    + '<td>' + resultUpAtk.toFixed(2) + '</td>'
+                    + '<td>' + resultUpDef.toFixed(2) + '</td>'
+                    + '<td>' + resultUpAgi.toFixed(2) + '</td>'
+                    + '<td>' + resultSum.toFixed(2) + '</td>'
+                    + '</tr>'
+                );
+                
+
+                if (btnName == "search") {
+                    $("#hp").val(parseInt(resultHp, 10));
+                    $("#atk").val(parseInt(resultAtk, 10));
+                    $("#def").val(parseInt(resultDef, 10));
+                    $("#agi").val(parseInt(resultAgi, 10));
+                }
+            }
+            else {
+                // 7등급
+                $('#myPet tbody').append(''
+                    + '<tr class="srank">'
+                    + '<td>' + nmRank + '</td>'
+                    + '<td>' + resultUpHp.toFixed(2) + '</td>'
+                    + '<td>' + resultUpAtk.toFixed(2) + '</td>'
+                    + '<td>' + resultUpDef.toFixed(2) + '</td>'
+                    + '<td>' + resultUpAgi.toFixed(2) + '</td>'
+                    + '<td>' + resultSum.toFixed(2) + '</td>'
+                    + '</tr>'
+                );
+            }
+
+            if (i == 1) {
+                var rank8 = Number($("#myPet tbody tr:eq(2) td:eq(1)").text());
+                var rank7 = Number($("#myPet tbody tr:eq(3) td:eq(1)").text());
+                var data  = " (" + preciseRound(rank7 - rank8) + ")";
+                $("#myPet tbody tr:eq(3) td:eq(1)").append(data);
+            }
+            else if (i == 2) {
+                var rank8 = Number($("#myPet tbody tr:eq(2) td:eq(2)").text());
+                var rank7 = Number($("#myPet tbody tr:eq(4) td:eq(2)").text());
+                var data  = " (" + preciseRound(rank7 - rank8) + ")";
+                $("#myPet tbody tr:eq(4) td:eq(2)").append(data);
+            }
+            else if (i == 3) {
+                var rank8 = Number($("#myPet tbody tr:eq(2) td:eq(3)").text());
+                var rank7 = Number($("#myPet tbody tr:eq(5) td:eq(3)").text());
+                var data  = " (" + preciseRound(rank7 - rank8) + ")";
+                $("#myPet tbody tr:eq(5) td:eq(3)").append(data);
+            }
+            else if (i == 4) {
+                var rank8 = Number($("#myPet tbody tr:eq(2) td:eq(4)").text());
+                var rank7 = Number($("#myPet tbody tr:eq(6) td:eq(4)").text());
+                var data  = " (" + preciseRound(rank7 - rank8) + ")";
+                $("#myPet tbody tr:eq(6) td:eq(4)").append(data);
+            }
+            
+
+            //$("#memo").append(resultHp);
+        }
+
+        function setBase(foundPet) {
+
+            $('#result tbody').empty();
+            result.length = 0;
+            const baseCnt = 5;
+            const baseInit = -2;
+            const base = {"hp":-2,"atk":-2,"def":-2,"agi":-2};
+            //const baseCnt = 6;
+            //const baseInit = -3;
+            //const base = {"hp":-3,"atk":-3,"def":-3,"agi":-3}; // 2024-06-13 토라 데이터 발견으로 의심되는 부분 수정함
+            
+            for (let i = 0; i < baseCnt; i++) {
+                for (let ii = 0; ii < baseCnt; ii++) {
+                    for (let iii = 0; iii < baseCnt; iii++) {
+                        for (let iiii = 0; iiii < baseCnt; iiii++) {
+                            setBonus(foundPet, base);
+                            base.hp++;
+                            if (base.hp == 3) {
+                                base.hp = baseInit; // 2024-06-13 토라 데이터 발견으로 의심되는 부분 수정함
+                            }
+                        }
+                        base.atk++;
+                        if (base.atk == 3) {
+                            base.atk = baseInit; // 2024-06-13 토라 데이터 발견으로 의심되는 부분 수정함
+                        }
+                    }
+                    base.def++;
+                    if (base.def == 3) {
+                        base.def = baseInit; // 2024-06-13 토라 데이터 발견으로 의심되는 부분 수정함
+                    }
+                }
+                base.agi++;
+                if (base.agi == 3) {
+                    base.agi = baseInit; // 2024-06-13 토라 데이터 발견으로 의심되는 부분 수정함
+                }
+            }
+            
+            print();
+        }
+
+        function setBonus(foundPet, base) {
+
+            const bonus = {"hp":0,"atk":0,"def":0,"agi":0};
+
+            for (let i = 0; i < 11; i++) {
+                for (let ii = 0; ii < 11; ii++) {
+                    for (let iii = 0; iii < 11; iii++) {
+                        for (let iiii = 0; iiii < 11; iiii++) {
+                            const sum = bonus.hp + bonus.atk + bonus.def + bonus.agi;
+                            if (sum == 10) {
+                                // 계산
+                                addData(foundPet, base, bonus);
+                            }
+                            bonus.hp++;
+                            if (bonus.hp == 11) {
+                                bonus.hp = 0;
+                            }
+                        }
+                        bonus.atk++;
+                        if (bonus.atk == 11) {
+                            bonus.atk = 0;
+                        }
+                    }
+                    bonus.def++;
+                    if (bonus.def == 11) {
+                        bonus.def = 0;
+                    }
+                }
+                bonus.agi++;
+                if (bonus.agi == 11) {
+                    bonus.agi = 0;
+                }
+            }
+        }
+
+        function addData(foundPet, base, bonus) {
+            
+            const hp  = preciseRound(foundPet.initnum * (foundPet.hp  + base.hp  + bonus.hp)  / 100);
+            const atk = preciseRound(foundPet.initnum * (foundPet.atk + base.atk + bonus.atk) / 100);
+            const def = preciseRound(foundPet.initnum * (foundPet.def + base.def + bonus.def) / 100);
+            const agi = preciseRound(foundPet.initnum * (foundPet.agi + base.agi + bonus.agi) / 100);
+            
+            const stat = {"rank":0,"hp":0,"atk":0,"def":0,"agi":0,"baseHp":0,"baseAtk":0,"baseDef":0,"baseAgi":0,"bonusHp":0,"bonusAtk":0,"bonusDef":0,"bonusAgi":0,"poison":0};
+            //stat.hp  = limitDecimalPlaces((hp * 4) + atk + def + agi, 2);
+            //stat.atk = limitDecimalPlaces((hp * 0.1) + atk + (def * 0.1) + (agi * 0.05), 2);
+            //stat.def = limitDecimalPlaces((hp * 0.1) + (atk * 0.1) + def + (agi * 0.05), 2);
+            //stat.agi = limitDecimalPlaces(agi, 2);
+            
+            stat.hp  = preciseRound((hp * 4) + atk + def + agi);
+            stat.atk = preciseRound((hp * 0.1) + atk + (def * 0.1) + (agi * 0.05));
+            stat.def = preciseRound((hp * 0.1) + (atk * 0.1) + def + (agi * 0.05));
+            stat.agi = agi;
+
+            stat.poison = parseInt((foundPet.initnum * (foundPet.hp  + base.hp  + bonus.hp)),  10)
+                        + parseInt((foundPet.initnum * (foundPet.atk + base.atk + bonus.atk)), 10)
+                        + parseInt((foundPet.initnum * (foundPet.def + base.def + bonus.def)), 10)
+                        + parseInt((foundPet.initnum * (foundPet.agi + base.agi + bonus.agi)), 10);
+            stat.poison = preciseRound(( stat.poison / 100 - 20 ) / 4);
+            if ( stat.poison < 1 ) stat.poison = 1;
+            
+            if (btnName == "calculate") {
+                if (Math.floor(stat.hp)  === parseInt($("#hp").val(),  10) &&
+                    Math.floor(stat.atk) === parseInt($("#atk").val(), 10) &&
+                    Math.floor(stat.def) === parseInt($("#def").val(), 10) &&
+                    Math.floor(stat.agi) === parseInt($("#agi").val(), 10)) {
+                    stat.rank     = base.hp + base.atk + base.def + base.agi;
+                    stat.baseHp   = base.hp;
+                    stat.baseAtk  = base.atk;
+                    stat.baseDef  = base.def;
+                    stat.baseAgi  = base.agi;
+                    stat.bonusHp  = bonus.hp;
+                    stat.bonusAtk = bonus.atk;
+                    stat.bonusDef = bonus.def;
+                    stat.bonusAgi = bonus.agi;
+                    result.push(stat);
+                    /*
+                    if (stat.rank == 8) {
+                        console.log(foundPet.initnum + " " + foundPet.hp  + " " + base.hp  + " " + bonus.hp);
+                        console.log(foundPet.initnum + " " + foundPet.atk + " " + base.atk + " " + bonus.atk);
+                        console.log(foundPet.initnum + " " + foundPet.def + " " + base.def + " " + bonus.def);
+                        console.log(foundPet.initnum + " " + foundPet.agi + " " + base.agi + " " + bonus.agi);
+                    }
+                    */
+                }
+            }
+            else if (btnName == "search") {
+                if (base.hp + base.atk + base.def + base.agi == 8) {
+                    stat.rank     = base.hp + base.atk + base.def + base.agi;
+                    stat.baseHp   = base.hp;
+                    stat.baseAtk  = base.atk;
+                    stat.baseDef  = base.def;
+                    stat.baseAgi  = base.agi;
+                    stat.bonusHp  = bonus.hp;
+                    stat.bonusAtk = bonus.atk;
+                    stat.bonusDef = bonus.def;
+                    stat.bonusAgi = bonus.agi;
+                    result.push(stat);
+                }
+            }
+        }
+
+        function print() {
+            result.sort(function(a, b) {
+                if (b['rank'] !== a['rank']) {
+                    return b['rank'] - a['rank']; // rank를 기준으로 내림차순 정렬
+                } else if (b['hp'] !== a['hp']) {
+                    return b['hp'] - a['hp']; // hp를 기준으로 내림차순 정렬
+                } else if (b['atk'] !== a['atk']) {
+                    return b['atk'] - a['atk']; // atk를 기준으로 내림차순 정렬
+                } else if (b['def'] !== a['def']) {
+                    return b['def'] - a['def']; // def를 기준으로 내림차순 정렬
+                } else {
+                    return b['agi'] - a['agi']; // agi를 기준으로 내림차순 정렬
+                }
+            });
+
+            for (let i = 0; i < result.length; i++) {
+                $('#result tbody').append(''
+                    + '<tr>'
+                    + '<td>' + (i + 1) + '</td>'
+                    + '<td class="' + (result[i].rank === 8 ? 'text-danger' : '') + '">' + result[i].rank + '</td>'
+                    + '<td>' + limitDecimalPlaces(result[i].hp,  2) + '[' + result[i].baseHp  + '](' + result[i].bonusHp  + ')</td>'
+                    + '<td>' + limitDecimalPlaces(result[i].atk, 2) + '[' + result[i].baseAtk + '](' + result[i].bonusAtk + ')</td>'
+                    + '<td>' + limitDecimalPlaces(result[i].def, 2) + '[' + result[i].baseDef + '](' + result[i].bonusDef + ')</td>'
+                    + '<td>' + limitDecimalPlaces(result[i].agi, 2) + '[' + result[i].baseAgi + '](' + result[i].bonusAgi + ')</td>'
+                    + '<td>' + result[i].poison + '</td>'
+                    + '</tr>'
+                );
+
+                if (i + 1 >= 300) {
+                    break;
+                }
+            }
+
+            // 결과 출력
+            let message = '';
+            if (btnName == "search") {
+
+                const name = $("#name").val();
+                message += `[${name}]의 8등급 분포는 다음과 같습니다!`;
+
+                // 값을 카운트할 객체 생성
+                var countMap = {};
+                var totalCount = result.length;
+                var statCounts = [];
+
+                // 배열을 반복하면서 각 요소의 값을 카운트
+                result.forEach(function(obj) {
+                    var key = parseInt(obj.hp, 10) + ', ' + parseInt(obj.atk, 10) + ', ' + parseInt(obj.def, 10) + ', ' + parseInt(obj.agi, 10);
+                    countMap[key] = (countMap[key] || 0) + 1;
+                });
+
+                // 결과를 문자열로 변환하여 출력
+                for (var key in countMap) {
+                    if (countMap.hasOwnProperty(key)) {
+                        var count = countMap[key];
+                        var percentage = (count / totalCount * 100).toFixed(2); // 백분율 계산 및 소수점 이하 두 자리까지만 표시
+                        //message += key + ' ' + countMap[key] + '건 (' + percentage + '%)\n';
+                        var arrStat = {};
+                        arrStat['key'] = key;
+                        arrStat['cnt'] = countMap[key];
+                        arrStat['per'] = percentage;
+                        statCounts.push(arrStat);
+                    }
+                }
+                
+                statCounts.sort(function (a, b) {
+                    if (b['cnt'] !== a['cnt']) {
+                        return b['cnt'] - a['cnt']; // 건수를 기준으로 내림차순 정렬
+                    } else if (b['key'] !== a['key']) {
+                        return b['key'] - a['key']; // 초기치를 기준으로 내림차순 정렬
+                    } 
+                });
+
+                statCounts.forEach(function(obj) {
+                    message += '\n' + obj['key'] + ' ' + obj['cnt'] + '건 (' + obj['per'] + '%)';
+                });
+            }
+            else if (btnName == "calculate") {
+                // 각 rank 값의 등장 횟수를 저장할 객체
+                const rankCounts = {};
+
+                // 배열 순회하면서 각 rank 값의 개수 체크
+                for (let i = 0; i < result.length; i++) {
+                    const rank = result[i].rank;
+                    if (rankCounts[rank] === undefined) {
+                        rankCounts[rank] = 1;
+                    } else {
+                        rankCounts[rank]++;
+                    }
+                }
+
+                // 객체를 배열로 변환하고 rank에 대해 내림차순으로 정렬
+                const ranks = Object.keys(rankCounts).sort((a, b) => b - a); // rank를 내림차순으로 정렬한 배열
+
+                const name = $("#name").val();
+                const hp = $("#hp").val();
+                const atk = $("#atk").val();
+                const def = $("#def").val();
+                const agi = $("#agi").val();
+                let   encounter = 0;
+                if (result.length > 0) {
+                    encounter = preciseRound(result.length / 178750 * 100).toFixed(4); // 모든 경우의 수 178750
+                }
+
+                message += `[${name}][${hp}, ${atk}, ${def}, ${agi}] 출현율: ${encounter}%\n`
+                const totalCount = Object.keys(rankCounts).reduce((acc, rank) => acc + rankCounts[rank], 0);
+                for (const rank of ranks) {
+                    const count = rankCounts[rank];
+                    const percentage = (count / totalCount * 100).toFixed(2); // 소수점 둘째 자리까지 표시
+                    message += `${rank} 등급: ${count} 건 (${percentage}%) \n`;
+                }
+            }
+            
+            alert(message);
+            //$("#search").attr("disabled", false);
+            //$("#calculate").attr("disabled", false);
+        }
+
+        // 각 랭크별 맹독 출력
+        function checkPoisonRank(copiedPet) {
+
+            $("#memo").empty();
+            var rank   = 8;
+            var poison = 0;
+            var data   = 0;
+            for (let i = 0; i < 5; i++) {
+                poison = parseInt((copiedPet.initnum * (copiedPet.hp  + 2 + 3 - i)), 10)
+                       + parseInt((copiedPet.initnum * (copiedPet.atk + 2 + 3)),     10)
+                       + parseInt((copiedPet.initnum * (copiedPet.def + 2 + 2)),     10)
+                       + parseInt((copiedPet.initnum * (copiedPet.agi + 2 + 2)),     10);
+                poison = preciseRound(( poison / 100 - 20 ) / 4);
+                if ( poison < 1 ) poison = 1;
+                rank = 8 - i;
+                if (i == 0) {
+                    data = parseInt(poison, 10);
+                }
+                if (data != parseInt(poison, 10)) {
+                    data = parseInt(poison, 10);
+                    $("#memo").append('<br>');
+                }
+                $("#memo").append(`[${rank}]: ${parseInt(poison, 10)}, `);
+            }
+
+            for (let i = 1; i < 5; i++) {
+                poison = parseInt((copiedPet.initnum * (copiedPet.hp  - 2 + 3)),     10)
+                       + parseInt((copiedPet.initnum * (copiedPet.atk + 2 + 3 - i)), 10)
+                       + parseInt((copiedPet.initnum * (copiedPet.def + 2 + 2)),     10)
+                       + parseInt((copiedPet.initnum * (copiedPet.agi + 2 + 2)),     10);
+                poison = preciseRound(( poison / 100 - 20 ) / 4);
+                if ( poison < 1 ) poison = 1;
+                rank = 4 - i;
+                if ( data != parseInt(poison, 10)) {
+                    data = parseInt(poison, 10);
+                    $("#memo").append('<br>');
+                }
+                $("#memo").append(`[${rank}]: ${parseInt(poison, 10)}, `);
+            }
+
+            for (let i = 1; i < 5; i++) {
+                poison = parseInt((copiedPet.initnum * (copiedPet.hp  - 2 + 3)),     10)
+                       + parseInt((copiedPet.initnum * (copiedPet.atk - 2 + 3)),     10)
+                       + parseInt((copiedPet.initnum * (copiedPet.def + 2 + 2 - i)), 10)
+                       + parseInt((copiedPet.initnum * (copiedPet.agi + 2 + 2)),     10);
+                poison = preciseRound(( poison / 100 - 20 ) / 4);
+                if ( poison < 1 ) poison = 1;
+                rank = 0 - i;
+                if ( data != parseInt(poison, 10)) {
+                    data = parseInt(poison, 10);
+                    $("#memo").append('<br>');
+                }
+                $("#memo").append(`[${rank}]: ${parseInt(poison, 10)}, `);
+            }
+
+            for (let i = 1; i < 5; i++) {
+                poison = parseInt((copiedPet.initnum * (copiedPet.hp  - 2 + 3)),     10)
+                       + parseInt((copiedPet.initnum * (copiedPet.atk - 2 + 3)),     10)
+                       + parseInt((copiedPet.initnum * (copiedPet.def - 2 + 2)),     10)
+                       + parseInt((copiedPet.initnum * (copiedPet.agi + 2 + 2 - i)), 10);
+                poison = preciseRound(( poison / 100 - 20 ) / 4);
+                if ( poison < 1 ) poison = 1;
+                rank = -4 - i;
+                if ( data != parseInt(poison, 10)) {
+                    data = parseInt(poison, 10);
+                    $("#memo").append('<br>');
+                }
+                $("#memo").append(`[${rank}]: ${parseInt(poison, 10)}, `);
+            }
+            
+        }
+
+        function limitDecimalPlaces(number, places) {
+            var power = Math.pow(10, places);
+            return (Math.floor(number * power) / power).toFixed(places);
+        }
+
+        function preciseRound(num) {
+            return Math.round(num * 1e12) / 1e12;
+        }
+
+        // 8등급, 7등급, 6등급 맹독 출력
+        function poisonDamageRank() {
+            for (var i = 0; i < pet.length; i++) {
+                var poison8 = parseInt((pet[i].initnum * (pet[i].hp + 2 + 3)),  10)
+                        + parseInt((pet[i].initnum * (pet[i].atk + 2 + 3)), 10)
+                        + parseInt((pet[i].initnum * (pet[i].def + 2 + 2)), 10)
+                        + parseInt((pet[i].initnum * (pet[i].agi + 2 + 2)), 10);
+                poison8 = preciseRound(( poison8 / 100 - 20 ) / 4);
+                if ( poison8 < 1 ) poison8 = 1;
+
+                var poison7 = parseInt((pet[i].initnum * (pet[i].hp + 1 + 3)),  10)
+                        + parseInt((pet[i].initnum * (pet[i].atk + 2 + 3)), 10)
+                        + parseInt((pet[i].initnum * (pet[i].def + 2 + 2)), 10)
+                        + parseInt((pet[i].initnum * (pet[i].agi + 2 + 2)), 10);
+                poison7 = preciseRound(( poison7 / 100 - 20 ) / 4);
+                if ( poison7 < 1 ) poison7 = 1;
+
+                var poison6 = parseInt((pet[i].initnum * (pet[i].hp + 0 + 3)),  10)
+                        + parseInt((pet[i].initnum * (pet[i].atk + 2 + 3)), 10)
+                        + parseInt((pet[i].initnum * (pet[i].def + 2 + 2)), 10)
+                        + parseInt((pet[i].initnum * (pet[i].agi + 2 + 2)), 10);
+                poison6 = preciseRound(( poison6 / 100 - 20 ) / 4);
+                if ( poison6 < 1 ) poison6 = 1;
+
+                var poison5 = parseInt((pet[i].initnum * (pet[i].hp - 1 + 3)),  10)
+                        + parseInt((pet[i].initnum * (pet[i].atk + 2 + 3)), 10)
+                        + parseInt((pet[i].initnum * (pet[i].def + 2 + 2)), 10)
+                        + parseInt((pet[i].initnum * (pet[i].agi + 2 + 2)), 10);
+                    poison5 = preciseRound(( poison5 / 100 - 20 ) / 4);
+                if ( poison5 < 1 ) poison5 = 1;
+
+                var poison4 = parseInt((pet[i].initnum * (pet[i].hp - 2 + 3)),  10)
+                        + parseInt((pet[i].initnum * (pet[i].atk + 2 + 3)), 10)
+                        + parseInt((pet[i].initnum * (pet[i].def + 2 + 2)), 10)
+                        + parseInt((pet[i].initnum * (pet[i].agi + 2 + 2)), 10);
+                    poison4 = preciseRound(( poison4 / 100 - 20 ) / 4);
+                if ( poison4 < 1 ) poison4 = 1;
+
+                if (poison8 >= 2 && poison8 % 1.0 < poison7 % 1.0) {
+                    $("#poisonRank8").append("<footer>" + pet[i].name + ": " + poison8 + "</footer>");
+                } 
+                else if (poison7 >= 2 && poison8 % 1.0 > poison7 % 1.0 && poison7 % 1.0 < poison6 % 1.0) {
+                    $("#poisonRank7").append("<footer>" + pet[i].name + ": " + poison8 + "</footer>");
+                }
+                else if (poison6 >= 2 && poison7 % 1.0 > poison6 % 1.0 && poison6 % 1.0 < poison5 % 1.0) {
+                    $("#poisonRank6").append("<footer>" + pet[i].name + ": " + poison8 + "</footer>");
+                }
+                else if (poison5 >= 2 && poison6 % 1.0 > poison5 % 1.0 && poison5 % 1.0 < poison4 % 1.0) {
+                    //$("#poisonRank5").append("<footer>" + pet[i].name + ": " + poison8 + "</footer>");
+                }
+            }
+        }
+
+        /*
+        function getListName() {
+            var text = "";
+            pet.forEach(function(obj) {
+                text += obj.name + ", ";
+            });
+            $("#listName").text(text);
+        }
+        */
+        /*
+        function checkUpdateExists() {
+            const version = 20250124000;
+            fetch(`https://leejoonwhan.github.io/stoneage/happy/pet/version.json?v=${new Date().getTime()}`)
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('Network response was not ok');
+                    }
+                    return response.text();  // 응답을 텍스트로 읽음
+                })
+                .then(text => {
+                    try {
+                        const data = JSON.parse(text);  // 텍스트를 JSON으로 파싱
+                        log("ClientVer: " + version);
+                        log("ServerVer: " + data.version);
+                        if (version < data.version) {
+                            let message = "업데이트가 확인되었습니다.\n페이지를 새로고침합니다.";
+                            if (data.message != "") {
+                                message += `\n\n업데이트 내용: \n${data.message}`;
+                            }
+                            
+                            if (!alert(message)) {
+                                location.reload();
+                            }
+                        }
+                    } catch (error) {
+                        console.error('Parsing error:', error);
+                    }
+                })
+                .catch(error => {
+                    console.error('Error fetching the JSON file:', error);
+            });
+        }
+        */
+        function log(message) {
+            const date = new Date();
+            
+            const year = date.getFullYear();
+            const month = String(date.getMonth() + 1).padStart(2, '0'); // 0-based index
+            const day = String(date.getDate()).padStart(2, '0');
+            
+            const hours = String(date.getHours()).padStart(2, '0');
+            const minutes = String(date.getMinutes()).padStart(2, '0');
+            const seconds = String(date.getSeconds()).padStart(2, '0');
+            const milliseconds = String(date.getMilliseconds()).padStart(3, '0');
+            
+            console.log(`[${year}-${month}-${day} ${hours}:${minutes}:${seconds}.${milliseconds}] ${message}`);
+        }
+
+
+        // jQuery
+        $(document).ready(function() {
+          petDataReady.then(function() {
+
+            log("reload");
+
+            // 페이지 로드 시 바로 실행
+            poisonDamageRank();
+            //getListName();
+
+            $("#name").on("keydown", function(event) {
+                if (event.key === 'Enter') {
+                    $("#search").click();
+                }
+            })
+
+            // 이름 자동완성: 입력할 때마다 매칭되는 이름들을 검색창 아래에 표시
+            $("#name").on("input", function() {
+                const keyword = $(this).val().trim();
+                const $suggestions = $("#nameSuggestions");
+                $suggestions.empty();
+
+                if (keyword === "") {
+                    $suggestions.hide();
+                    return;
+                }
+
+                const matches = pet.filter(p => p.name.includes(keyword));
+
+                if (matches.length === 0) {
+                    $suggestions.hide();
+                    return;
+                }
+
+                matches.forEach(p => {
+                    const $li = $("<li></li>").text(p.name);
+                    $suggestions.append($li);
+                });
+
+                $suggestions.show();
+            });
+
+            // 자동완성 항목 클릭 시 검색창에 채우기
+            $("#nameSuggestions").on("click", "li", function() {
+                $("#name").val($(this).text());
+                $("#nameSuggestions").empty().hide();
+            });
+
+            // 검색창 외부 클릭 시 자동완성 목록 숨김
+            $(document).on("click", function(event) {
+                if (!$(event.target).closest("#nameAutocompleteWrap").length) {
+                    $("#nameSuggestions").hide();
+                }
+            });
+
+            // 검색창 재포커스 시 기존 입력값 기준으로 목록 다시 표시
+            $("#name").on("focus", function() {
+                if ($(this).val().trim() !== "") {
+                    $(this).trigger("input");
+                }
+            });
+
+            // 검색 버튼
+            $("#search").on("click", function() {
+                //$(this).attr("disabled", true);
+
+                const foundPet = pet.find(p => p.name === $("#name").val());
+                if (foundPet == undefined) {
+                    alert("페트 정보를 찾을 수 없습니다.");
+                    return;
+                }
+                btnName = "search";
+                
+                // search 초기화 및 목록 생성
+                $(".srank").remove();
+                for (let i = 0; i < 5; i++) {
+                    // foundPet을 깊은 복사하여 새로운 객체를 생성
+                    const copiedPet = JSON.parse(JSON.stringify(foundPet));
+                    setSRank(i, copiedPet);
+                }
+                setBase(foundPet);
+
+                // 등급별 맹독 출력
+                const copiedPet = JSON.parse(JSON.stringify(foundPet));
+                checkPoisonRank(copiedPet);
+            });
+
+            // 계산 버튼
+            $("#calculate").on("click", function() {
+                //$(this).attr("disabled", true);
+
+                const foundPet = pet.find(p => p.name === $("#name").val());
+                if (foundPet == undefined) {
+                    alert("페트 정보를 찾을 수 없습니다.");
+                    return;
+                }
+                btnName = "calculate";
+                
+                // search 초기화 및 목록 생성
+                $(".srank").remove();
+                for (let i = 0; i < 5; i++) {
+                    // foundPet을 깊은 복사하여 새로운 객체를 생성
+                    const copiedPet = JSON.parse(JSON.stringify(foundPet));
+                    setSRank(i, copiedPet);
+                }
+                setBase(foundPet);
+            });
+
+            // 5분마다 업데이트 여부를 확인
+            //setInterval(checkUpdateExists, 1000 * 60 * 5);
+
+            // 사용자가 버튼을 클릭하면 문서 상단으로 스크롤
+            var btnTop = document.getElementById("btnTop");
+            $("#btnTop").on("click", function() {
+                document.body.scrollTop = 0;
+                document.documentElement.scrollTop = 0;
+            });
+          });
+        });
+    </script>
+</head>
+<body>
+    <div class="container">
+        <h2>Happy Server Pet Rank Info</h2>
+
+        <div class="link-bar">
+            <a href="https://happy02.net/" target="_blank"><h4>Happy Server</h4></a>
+            <a href="https://J-balcon.github.io/stone/reverse_happy.html" target="_blank"><h4>Pet Reverse Info</h4></a>
+            <a href="https://J-balcon.github.io/stone/petlevelup.html" target="_blank"><h4>Level Up Simulator</h4></a>
+        </div>
+        <p class="text-right" id="ver"></p>
+        <p class="lead" id="listName"></p>
+
+        <div class="card">
+            <h3>등급별 맹독 데미지 순위</h3>
+            <div class="poison-grid">
+                <div class="poison-card tier8">
+                    <h4>8등급</h4>
+                    <div id="poisonRank8"></div>
+                </div>
+                <div class="poison-card tier7">
+                    <h4>7등급</h4>
+                    <div id="poisonRank7"></div>
+                </div>
+                <div class="poison-card tier6">
+                    <h4>6등급</h4>
+                    <div id="poisonRank6"></div>
+                </div>
+            </div>
+        </div>
+        
+        <!--
+        <blockquote>
+            <strong>
+                <p>가끔 오해하시거나 잘못 이해하신 분들을 위해 설명을 보충합니다.</p>
+                <p>[2][2][2][2] 즉 8등급이 나오더라도 성장률 베이스만 최대치인 것이지 무조건 S이상 성장률이 나오는 것이 아닙니다.</p>
+                <p>페트는 레벨업할 때 마다 50의 주사위와 10의 총 2개의 주사위가 굴려집니다. (-8등급 ~ 8등급 모두 동일)</p>
+                <p>레벨 101까지 키웠다고 가정했을 때 첫 번째 주사위의 값이 평균 25가 나오면 S가 되는 것이고 20이 나오면 A나 B가 될 수 있는 것 입니다.</p>
+                <p>두 번째 주사위는 무조건 10이 나오나 각 능력치마다 랜덤으로 분배 됩니다.</p>
+                <p>내구력, 공격력, 방어력, 순발력에 평균적으로 2.5가 분배되면 고른 능력치가 되는 것이고</p>
+                <p>한 쪽에 몰리면 다른 한 쪽은 평균보다 낮아집니다.</p>
+                <footer>
+                    첫 번째 주사위 평균 25, 두 번째 주사위 평균 4, 3, 2, 1 일 경우 : S+ S+ A+ A
+                </footer>
+                <footer>
+                    첫 번째 주사위 평균 10, 두 번째 주사위 평균 2.5 2.5 2.5 2.5 일 경우 : F F F F
+                </footer>
+                <p>그러면, 해당 계산기로 얻는 정보는 무엇이냐</p>
+                <p>도박급이 떴을 때 키워도 될지에 대한 판단, 그리고 페트 환생이 생길 경우 환생을 해도 되는지에 대한 여부를 판단하는 용도 입니다.</p>
+                <p>그리고, 극단적으로 레벨 30까지 키웠을 때 첫 번째 주사위의 평균 값이 20이여서 A ~ B 등급일 때 꾸준히 레벨업하면 그나마 25에 근사값 21~23까지는 복구가 될 수도 있습니다.</p>
+                <p>잘 크던게 마지막에 망하는 이유는 첫 번째 주사위가 초반에 높게 나오다가 점점 25에 수렴하여 낮아지기 때문입니다.</p>
+                <p>안 좋게 크다가 나중에 잘 크는게 보이지 않는 이유는 렙 30정도 되면 다 포기하고 버리기 때문입니다. (8등급 한정)</p>
+                <p>다시 한 번 말씀드리지만, 해당 계산기에서 8등급이 나오더라도 모든 스텟이 S급 이상 성장률을 보장하는 것은 절대 아닙니다.</p>
+                <p>해당 계산기는 참고용이며, 판단은 사용자의 몫입니다.</p>
+            </strong>
+        </blockquote>
+        <blockquote>
+            <p>펫 이름과 초기치를 입력해주세요. 만약, 입력값과 출력되는 S급 초기치가 다르다면 제보해주세요.</p>
+            <p>8 등급부터 -8 등급까지 존재하며 8등급이 S급 확률입니다.</p>
+        </blockquote>
+        <blockquote>
+            <p>[ 숫자 ] 와 ( 숫자 ) 에 대해서 설명을 드립니다.</p>
+            <p>[ 숫자 ] 는 [-2, -1, 0, 1, 2] 이렇게 총 5가지가 존재합니다.</p>
+            <p>[ 숫자 ] 는 초기치와 성장률에 영향을 줍니다. 따라서 내구력, 공격력, 방어력, 순발력 모두 [2]가 붙어야 8등급(S급)입니다.</p>
+            <p>( 숫자 ) 는 (0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10) 이렇게 총 11가지가 존재합니다.</p>
+            <p>( 숫자 ) 는 초기치만 영향을 줍니다. 따라서, 내구력, 공격력, 방어력, 순발력에 (0)이 붙더라도 S급과는 연관이 없습니다.</p>
+            <p>( 숫자 ) 의 내구력 + 공격력 + 방어력 + 순발력 합은 S급도 10, F급도 10, 무조건 10입니다.</p>
+        </blockquote>
+        -->
+        <div class="card">
+            <h3>펫 검색 / 등급 계산</h3>
+            <div class="search-form">
+                <div class="field-group" id="nameAutocompleteWrap">
+                    <label>이름</label>
+                    <div class="input-group">
+                        <input type="text" class="form-control" id="name" placeholder="얀기로" autocomplete="off">
+                        <div class="input-group-btn">
+                            <button class="btn btn-default" type="button" id="search"><i class="glyphicon glyphicon-search"></i></button>
+                        </div>
+                    </div>
+                    <ul id="nameSuggestions"></ul>
+                </div>
+                <div class="field-group">
+                    <label>내구력</label>
+                    <input type="number" class="form-control" id="hp" placeholder="57">
+                </div>
+                <div class="field-group">
+                    <label>공격력</label>
+                    <input type="number" class="form-control" id="atk" placeholder="12">
+                </div>
+                <div class="field-group">
+                    <label>방어력</label>
+                    <input type="number" class="form-control" id="def" placeholder="7">
+                </div>
+                <div class="field-group">
+                    <label>순발력</label>
+                    <input type="number" class="form-control" id="agi" placeholder="6">
+                </div>
+                <div class="btn-row">
+                    <button type="button" class="btn btn-primary" id="calculate">계산</button>
+                </div>
+            </div>
+
+            <div id="memo"></div>
+
+            <div class="table-responsive" id="myPet">
+                <table class="table table-striped">
+                    <colgroup>
+                        <col width="130px">
+                        <col width="50px">
+                        <col width="50px">
+                        <col width="50px">
+                        <col width="50px">
+                        <col width="50px">
+                    </colgroup>
+                    <thead>
+                        <tr>
+                            <th>구분</th>
+                            <th>내구력</th>
+                            <th>공격력</th>
+                            <th>방어력</th>
+                            <th>순발력</th>
+                            <th></th>
+                        </tr>
+                    </thead>
+                    <tbody></tbody>
+                </table>
+            </div>
+        </div>
+
+        <div class="card">
+        <h3>검색 결과</h3>
+        <div class="table-responsive" id="result">
+            <table class="table table-striped">
+                <colgroup>
+                    
+                </colgroup>
+                <thead>
+                    <tr>
+                        <th>순번</th>
+                        <th>등급</th>
+                        <th>내구력</th>
+                        <th>공격력</th>
+                        <th>방어력</th>
+                        <th>순발력</th>
+                        <th>맹독 데미지</th>
+                    </tr>
+                </thead>
+                <tbody>
+                </tbody>
+            </table>
+        </div>
+        </div>
+    </div>
+    <button id="btnTop" title="Go to top">Top</button>
+    <br>
+    <br>
+    <br>
+    <br>
+</div>
+</body>
+</html>
