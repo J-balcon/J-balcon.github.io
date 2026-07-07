@@ -1,0 +1,347 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Animation Portfolio</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@500;700;800&family=Big+Shoulders+Display:wght@500;700;900&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg-black:#0A0A0B;
+    --silver:#C7CBCF;
+    --silver-dim:#8A8F94;
+    --panel-dark:#141517;
+    --panel-darker:#0D0E0F;
+
+    /* 썸네일 자리 */
+    --toon-thumb: linear-gradient(160deg, #1c1d1f, #0D0E0F);
+    --real-thumb: linear-gradient(160deg, #17181a, #0A0A0B);
+  }
+  *{box-sizing:border-box;margin:0;padding:0;}
+  html{scroll-behavior:smooth;}
+  body{font-family:'Inter',sans-serif;background:var(--bg-black);color:var(--silver);overflow-x:hidden;}
+
+  /* ---------- HERO ---------- */
+  .hero{
+    min-height:80vh;
+    position:relative;
+    display:flex;flex-direction:column;justify-content:center;align-items:center;
+    text-align:center;
+    padding:8vh 6vw;
+    background:var(--bg-black);
+    overflow:hidden;
+  }
+  /* 슬라이드쇼 레이어 — 사진 추가 시 .slide 의 background-image 교체 */
+  .hero-slideshow{
+    position:absolute;inset:0;z-index:0;
+  }
+  .slide{
+    position:absolute;inset:0;
+    background-size:cover;background-position:center;
+    opacity:0;
+    transition:opacity 1.6s ease;
+  }
+  .slide.active{opacity:0.35;}
+  .hero::after{
+    content:"";position:absolute;inset:0;z-index:1;
+    background:linear-gradient(180deg, rgba(10,10,11,0.4), rgba(10,10,11,0.85));
+  }
+  .hero-content{position:relative;z-index:2;}
+  .hero-name{
+    font-family:'Big Shoulders Display',sans-serif;
+    font-weight:900;
+    font-size:clamp(3rem,9vw,7rem);
+    line-height:0.9;
+    letter-spacing:-0.02em;
+    color:var(--silver);
+  }
+  .hero-name .split{color:#fff;}
+  .hero-sub{
+    margin:1.2rem auto 0;
+    font-size:clamp(0.95rem,1.6vw,1.15rem);
+    font-weight:500;
+    color:var(--silver-dim);
+    max-width:32rem;
+  }
+  .hero-sub .light{color:#fff;}
+  .hero-tags{
+    margin-top:1.8rem;
+    display:flex;gap:0.6rem;flex-wrap:wrap;justify-content:center;
+  }
+  .tag{
+    font-family:'Big Shoulders Display',sans-serif;
+    font-weight:700;
+    font-size:0.85rem;
+    padding:0.35rem 0.9rem;
+    border-radius:999px;
+    letter-spacing:0.03em;
+    cursor:pointer;
+    transition:transform 0.25s ease;
+    border:1px solid var(--silver-dim);
+    background:transparent;
+    color:var(--silver);
+  }
+  .tag:hover{transform:scale(1.06);background:var(--silver);color:#000;}
+  .tag.active{background:var(--silver);color:#000;}
+  .tag:focus-visible{outline:2px solid #fff;outline-offset:2px;}
+
+  /* ---------- SCROLL REVEAL ---------- */
+  .reveal{opacity:0;transform:translateY(28px);transition:opacity 0.9s ease, transform 0.9s ease;}
+  .reveal.in{opacity:1;transform:none;}
+
+  /* ---------- WORK ---------- */
+  .work{
+    display:flex;
+    min-height:80vh;
+    position:relative;
+  }
+  .col{
+    position:relative;
+    flex:1 1 0;
+    display:flex;flex-direction:column;justify-content:center;
+    padding:2rem 1.5rem;
+    overflow:hidden;
+    cursor:pointer;
+    transition:flex-grow 0.5s cubic-bezier(.4,0,.2,1);
+    color:var(--silver);
+  }
+  .col:focus-visible{outline:2px solid #fff;outline-offset:-4px;}
+  .col-bg{
+    position:absolute;inset:0;
+    background-size:cover;background-position:center;
+    z-index:0;
+    opacity:0.5;
+    transition:opacity 0.5s ease, transform 0.6s ease;
+  }
+  .col-inner{position:relative;z-index:1;}
+  .col-inner > *{transition:transform 0.5s cubic-bezier(.4,0,.2,1);}
+  .col-head{margin-bottom:1.4rem;}
+  .work-label{
+    font-family:'Big Shoulders Display',sans-serif;
+    font-weight:900;
+    font-size:clamp(1.6rem,3vw,2.6rem);
+    line-height:0.95;
+    color:#fff;
+    cursor:pointer;
+    width:fit-content;
+    transition:opacity 0.2s ease;
+  }
+  .work-label:hover{opacity:0.75;}
+  .work-desc{
+    font-size:0.92rem;
+    line-height:1.5;
+    margin-top:0.5rem;
+    max-width:24rem;
+    color:var(--silver-dim);
+  }
+  .video-frame{
+    position:relative;
+    width:100%;
+    max-width:100%;
+    aspect-ratio:16/9;
+    overflow:hidden;
+    border:1px solid #2a2b2d;
+  }
+  .video-frame iframe{
+    position:absolute;top:0;left:0;width:100%;height:100%;border:0;
+  }
+
+  .col.toon{
+    background:var(--panel-dark);
+    clip-path:polygon(0 0, 100% 0, calc(100% - 60px) 100%, 0 100%);
+    margin-right:-60px;
+  }
+  .col.real{
+    background:var(--panel-darker);
+    clip-path:polygon(60px 0, 100% 0, 100% 100%, 0 100%);
+    padding-left:4.5rem;
+  }
+  .col.toon .col-bg{ background-image:var(--toon-thumb); }
+  .col.real .col-bg{ background-image:var(--real-thumb); }
+
+  .col.toon .index{
+    font-family:'Baloo 2',sans-serif;font-weight:800;
+    color:var(--silver);
+    font-size:0.9rem;
+  }
+  .col.real .index{
+    font-family:'Big Shoulders Display',sans-serif;font-weight:700;
+    color:var(--silver-dim);
+    font-size:0.9rem;
+    letter-spacing:0.08em;
+  }
+
+  .work.hover-toon .col.toon{flex-grow:1.6;}
+  .work.hover-toon .col.real{flex-grow:0.6;}
+  .work.hover-real .col.real{flex-grow:1.6;}
+  .work.hover-real .col.toon{flex-grow:0.6;}
+
+  /* 확장된(활성) 쪽 강조 — 배경 선명해지고 텍스트 살짝 이동 */
+  .work.hover-toon .col.toon .col-bg{opacity:0.75;}
+  .work.hover-real .col.real .col-bg{opacity:0.75;}
+  .work.hover-toon .col.real .col-inner,
+  .work.hover-real .col.toon .col-inner{opacity:0.55;}
+  .col-inner{transition:opacity 0.4s ease, transform 0.9s ease;}
+  .work.hover-toon .col.toon .col-inner > *,
+  .work.hover-real .col.real .col-inner > *{transform:translateX(6px);}
+
+  /* 축소된 쪽은 살짝 흐릿하게, 상세페이지 이동 여지가 남아있음을 암시 */
+  .work.hover-toon .col.real,
+  .work.hover-real .col.toon{filter:saturate(0.85);}
+
+  @media (max-width:800px){
+    .work{flex-direction:column;min-height:auto;}
+    .col.toon, .col.real{clip-path:none;margin:0;padding:3rem 1.5rem;}
+    .work.hover-toon .col.toon, .work.hover-toon .col.real,
+    .work.hover-real .col.real, .work.hover-real .col.toon{flex-grow:1;}
+  }
+
+  /* ---------- FOOTER ---------- */
+  footer{
+    background:var(--bg-black);color:var(--silver-dim);
+    padding:5vh 6vw;
+    text-align:center;
+    font-size:0.85rem;
+    border-top:1px solid #1c1d1f;
+  }
+  footer a{color:#fff;text-decoration:none;border-bottom:1px solid var(--silver-dim);}
+</style>
+</head>
+<body>
+
+<div class="hero">
+  <div class="hero-slideshow" id="slideshow">
+    <!-- 사진 추가 시: <div class="slide" style="background-image:url('photo1.jpg')"></div> 를 여러 개 넣으면 자동으로 순환됩니다 -->
+    <div class="slide active"></div>
+  </div>
+  <div class="hero-content reveal">
+    <div class="hero-name"><span class="split">YOUR</span> NAME</div>
+    <div class="hero-sub">Character &amp; VFX Animator — 툰 셰이더 카투니 애니메이션과 <span class="light">실사 그래픽 무게감 연출</span> 두 축을 오가며 작업합니다.</div>
+    <div class="hero-tags">
+      <span class="tag" id="tag-toon" tabindex="0" role="button" aria-pressed="false">TOON SHADER</span>
+      <span class="tag" id="tag-real" tabindex="0" role="button" aria-pressed="false">PHOTOREAL WEIGHT</span>
+    </div>
+  </div>
+</div>
+
+<section class="work" id="work">
+  <div class="col toon" id="col-toon" tabindex="0" role="button" aria-pressed="false" aria-label="TOON SHADER 작업 보기">
+    <div class="col-bg"></div>
+    <div class="col-inner reveal">
+      <div class="col-head">
+        <div class="index">01 — CARTOON</div>
+        <div class="work-label" id="label-toon">TOON SHADER</div>
+        <div class="work-desc">굵은 외곽선과 평면 셰이딩, 과장된 타이밍.</div>
+      </div>
+      <div class="video-frame">
+        <iframe src="https://www.youtube-nocookie.com/embed/clMdal8VOGQ" referrerpolicy="strict-origin-when-cross-origin" allow="autoplay; fullscreen; picture-in-picture" allowfullscreen></iframe>
+      </div>
+    </div>
+  </div>
+
+  <div class="col real" id="col-real" tabindex="0" role="button" aria-pressed="false" aria-label="PHYSICAL WEIGHT 작업 보기">
+    <div class="col-bg"></div>
+    <div class="col-inner reveal">
+      <div class="col-head">
+        <div class="index">02 — REALISTIC</div>
+        <div class="work-label" id="label-real">PHYSICAL WEIGHT</div>
+        <div class="work-desc">중력과 관성을 살린 무게감 있는 움직임.</div>
+      </div>
+      <div class="video-frame">
+        <iframe src="https://www.youtube-nocookie.com/embed/X_EfCIHTrwE" referrerpolicy="strict-origin-when-cross-origin" allow="autoplay; fullscreen; picture-in-picture" allowfullscreen></iframe>
+      </div>
+    </div>
+  </div>
+</section>
+
+<footer>
+  Contact — <a href="mailto:you@example.com">you@example.com</a>
+</footer>
+
+<script>
+  // 호버 확장 + 클릭 시 스크롤 이동 & 상태 고정(재클릭 시 해제)
+  const work = document.getElementById('work');
+  const tagToon = document.getElementById('tag-toon');
+  const tagReal = document.getElementById('tag-real');
+  const colToon = document.getElementById('col-toon');
+  const colReal = document.getElementById('col-real');
+  const labelToon = document.getElementById('label-toon');
+  const labelReal = document.getElementById('label-real');
+  let locked = null;
+
+  function setHover(name){
+    work.classList.remove('hover-toon','hover-real');
+    if(name) work.classList.add('hover-' + name);
+  }
+
+  function updateUI(){
+    tagToon.classList.toggle('active', locked === 'toon');
+    tagReal.classList.toggle('active', locked === 'real');
+    tagToon.setAttribute('aria-pressed', locked === 'toon');
+    tagReal.setAttribute('aria-pressed', locked === 'real');
+    colToon.setAttribute('aria-pressed', locked === 'toon');
+    colReal.setAttribute('aria-pressed', locked === 'real');
+  }
+
+  // 마우스가 올라간 동안만 미리보기(잠금 상태가 아닐 때)
+  function bindHover(el, name){
+    el.addEventListener('mouseenter', () => { if(!locked) setHover(name); });
+    el.addEventListener('mouseleave', () => { if(!locked) setHover(locked); });
+  }
+  bindHover(tagToon, 'toon');
+  bindHover(tagReal, 'real');
+  bindHover(colToon, 'toon');
+  bindHover(colReal, 'real');
+
+  // 클릭/키보드로 고정 — 같은 쪽 다시 클릭하면 해제
+  function toggleLock(name, {scroll} = {}){
+    locked = (locked === name) ? null : name;
+    setHover(locked);
+    updateUI();
+    if(scroll && locked) work.scrollIntoView({behavior:'smooth', block:'start'});
+  }
+
+  tagToon.addEventListener('click', () => toggleLock('toon', {scroll:true}));
+  tagReal.addEventListener('click', () => toggleLock('real', {scroll:true}));
+  colToon.addEventListener('click', () => toggleLock('toon'));
+  colReal.addEventListener('click', () => toggleLock('real'));
+  labelToon.addEventListener('click', (e) => { e.stopPropagation(); toggleLock('toon'); });
+  labelReal.addEventListener('click', (e) => { e.stopPropagation(); toggleLock('real'); });
+
+  // 키보드 접근성 (Enter / Space)
+  [tagToon, tagReal, colToon, colReal].forEach(el => {
+    el.addEventListener('keydown', (e) => {
+      if(e.key === 'Enter' || e.key === ' '){
+        e.preventDefault();
+        el.click();
+      }
+    });
+  });
+
+  // 히어로 배경 슬라이드쇼 (사진은 나중에 .slide div로 추가)
+  const slides = document.querySelectorAll('#slideshow .slide');
+  let current = 0;
+  if (slides.length > 1) {
+    setInterval(() => {
+      slides[current].classList.remove('active');
+      current = (current + 1) % slides.length;
+      slides[current].classList.add('active');
+    }, 4000);
+  }
+
+  // 스크롤 등장(reveal) 애니메이션
+  const revealEls = document.querySelectorAll('.reveal');
+  const revealObserver = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if(entry.isIntersecting){
+        entry.target.classList.add('in');
+        revealObserver.unobserve(entry.target);
+      }
+    });
+  }, {threshold:0.15});
+  revealEls.forEach(el => revealObserver.observe(el));
+</script>
+
+</body>
+</html>
