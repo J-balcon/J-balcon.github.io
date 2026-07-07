@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Animation Portfolio</title>
+<title>정학영 | Animation Portfolio</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@500;700;800&family=Big+Shoulders+Display:wght@500;700;900&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
 <style>
@@ -57,6 +57,13 @@
     color:var(--silver);
   }
   .hero-name .split{color:#fff;}
+  .hero-korean-name{
+    margin-top:0.5rem;
+    font-size:1.05rem;
+    font-weight:500;
+    letter-spacing:0.2em;
+    color:var(--silver-dim);
+  }
   .hero-sub{
     margin:1.2rem auto 0;
     font-size:clamp(0.95rem,1.6vw,1.15rem);
@@ -65,6 +72,14 @@
     max-width:32rem;
   }
   .hero-sub .light{color:#fff;}
+  .hero-meta{
+    margin-top:1rem;
+    font-size:0.75rem;
+    font-weight:600;
+    letter-spacing:0.14em;
+    text-transform:uppercase;
+    color:var(--silver-dim);
+  }
   .hero-tags{
     margin-top:1.8rem;
     display:flex;gap:0.6rem;flex-wrap:wrap;justify-content:center;
@@ -216,8 +231,10 @@
     <div class="slide active"></div>
   </div>
   <div class="hero-content reveal">
-    <div class="hero-name"><span class="split">YOUR</span> NAME</div>
-    <div class="hero-sub">Character &amp; VFX Animator — 툰 셰이더 카투니 애니메이션과 <span class="light">실사 그래픽 무게감 연출</span> 두 축을 오가며 작업합니다.</div>
+    <div class="hero-name"><span class="split">HAKYOUNG</span> JUNG</div>
+    <div class="hero-korean-name">정학영</div>
+    <div class="hero-sub">Character Animator, 10년 차 — Locus Studio·Lennon Studio 출신으로 프리비즈부터 파이널 애니메이션까지 전 과정을 다룹니다. 말·용 같은 크리쳐부터 사람까지, <span class="light">카투니 애니메이션</span>과 <span class="light">실사 모캡 기반 애니메이션</span> 양쪽을 오가며 작업합니다.</div>
+    <div class="hero-meta">10 Years · Locus Studio · Lennon Studio</div>
     <div class="hero-tags">
       <span class="tag" id="tag-toon" tabindex="0" role="button" aria-pressed="false">TOON SHADER</span>
       <span class="tag" id="tag-real" tabindex="0" role="button" aria-pressed="false">PHOTOREAL WEIGHT</span>
@@ -232,7 +249,7 @@
       <div class="col-head">
         <div class="index">01 — CARTOON</div>
         <div class="work-label" id="label-toon">TOON SHADER</div>
-        <div class="work-desc">굵은 외곽선과 평면 셰이딩, 과장된 타이밍.</div>
+        <div class="work-desc">말·용 등 크리쳐부터 사람까지 — 굵은 외곽선과 평면 셰이딩, 과장된 타이밍.</div>
       </div>
       <div class="video-frame">
         <iframe id="yt-toon" src="https://www.youtube-nocookie.com/embed/clMdal8VOGQ?enablejsapi=1" referrerpolicy="strict-origin-when-cross-origin" allow="autoplay; fullscreen; picture-in-picture" allowfullscreen></iframe>
@@ -246,7 +263,7 @@
       <div class="col-head">
         <div class="index">02 — REALISTIC</div>
         <div class="work-label" id="label-real">PHYSICAL WEIGHT</div>
-        <div class="work-desc">중력과 관성을 살린 무게감 있는 움직임.</div>
+        <div class="work-desc">모캡 기반, 중력과 관성을 살린 무게감 있는 움직임.</div>
       </div>
       <div class="video-frame">
         <iframe id="yt-real" src="https://www.youtube-nocookie.com/embed/X_EfCIHTrwE?enablejsapi=1" referrerpolicy="strict-origin-when-cross-origin" allow="autoplay; fullscreen; picture-in-picture" allowfullscreen></iframe>
