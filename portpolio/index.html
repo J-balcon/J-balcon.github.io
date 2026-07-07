@@ -4,6 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>정학영 | Animation Portfolio</title>
+<meta name="description" content="캐릭터 애니메이터 정학영 — 10년차, 카투니 스타일라이즈드와 리얼리스틱 모캡. Locus Studio·Lennon Studio 출신.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@500;700;800&family=Big+Shoulders+Display:wght@500;700;900&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
 <style>
@@ -90,6 +91,7 @@
     display:flex;gap:0.6rem;flex-wrap:wrap;justify-content:center;
   }
   .tag{
+    appearance:none;-webkit-appearance:none;-moz-appearance:none;
     font-family:'Big Shoulders Display',sans-serif;
     font-weight:700;
     font-size:0.85rem;
@@ -105,6 +107,19 @@
   .tag:hover{transform:scale(1.06);background:var(--silver);color:#000;}
   .tag.active{background:var(--silver);color:#000;}
   .tag:focus-visible{outline:2px solid #fff;outline-offset:2px;}
+  .scroll-hint{
+    position:absolute;bottom:2.2rem;left:50%;transform:translateX(-50%);
+    z-index:2;
+    color:var(--silver-dim);
+    font-size:1.3rem;
+    text-decoration:none;
+    animation:scroll-bounce 2.2s ease-in-out infinite;
+  }
+  .scroll-hint:hover{color:#fff;}
+  @keyframes scroll-bounce{
+    0%,100%{transform:translateX(-50%) translateY(0);}
+    50%{transform:translateX(-50%) translateY(8px);}
+  }
 
   /* ---------- SCROLL REVEAL ---------- */
   .reveal{opacity:0;transform:translateY(28px);transition:opacity 0.9s ease, transform 0.9s ease;}
@@ -136,7 +151,7 @@
   }
   .col-inner{position:relative;z-index:1;}
   .col-inner > *{transition:transform 0.5s cubic-bezier(.4,0,.2,1);}
-  .col-head{margin-bottom:1.4rem;}
+  .col-head{margin-bottom:2rem;}
   .work-label{
     font-family:'Big Shoulders Display',sans-serif;
     font-weight:900;
@@ -166,6 +181,31 @@
   .video-frame iframe{
     position:absolute;top:0;left:0;width:100%;height:100%;border:0;
   }
+  .video-facade{
+    appearance:none;-webkit-appearance:none;
+    position:absolute;inset:0;width:100%;height:100%;
+    border:0;padding:0;margin:0;cursor:pointer;
+    background:#000;display:block;
+  }
+  .video-facade img{
+    width:100%;height:100%;object-fit:cover;display:block;
+    opacity:0.8;transition:opacity 0.3s ease;
+  }
+  .video-facade:hover img, .video-facade:focus-visible img{opacity:1;}
+  .video-facade .play-icon{
+    position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);
+    width:4rem;height:4rem;border-radius:50%;
+    display:flex;align-items:center;justify-content:center;
+    background:rgba(10,10,11,0.55);
+    border:2px solid rgba(255,255,255,0.85);
+    color:#fff;font-size:1.3rem;
+    transition:transform 0.2s ease, background 0.2s ease;
+  }
+  .video-facade:hover .play-icon, .video-facade:focus-visible .play-icon{
+    transform:translate(-50%,-50%) scale(1.08);
+    background:rgba(10,10,11,0.8);
+  }
+  .video-facade:focus-visible{outline:2px solid #fff;outline-offset:2px;}
 
   .col.toon{
     background:var(--panel-dark);
@@ -230,34 +270,39 @@
 </head>
 <body>
 
-<div class="hero">
+<header class="hero">
   <div class="hero-slideshow" id="slideshow">
     <!-- 사진 추가 시: <div class="slide" style="background-image:url('photo1.jpg')"></div> 를 여러 개 넣으면 자동으로 순환됩니다 -->
     <div class="slide active"></div>
   </div>
-  <div class="hero-content reveal">
-    <div class="hero-name"><span class="split">HAKYOUNG</span> JEONG</div>
+  <div class="hero-content">
+    <h1 class="hero-name"><span class="split">HAKYOUNG</span> JEONG</h1>
     <div class="hero-korean-name">정학영</div>
     <div class="hero-sub">Character Animator / 10 Years — Locus Studio · Lennon Studio 출신. 프리비즈부터 파이널까지, 카투니 스타일라이즈드와 리얼리스틱 모캡 애니메이션을 넘나들며 <span class="light">크리쳐와 캐릭터에 생명력을 불어넣습니다</span>.</div>
     <div class="hero-email"><a href="mailto:goodgkrdud@gmail.com">goodgkrdud@gmail.com</a></div>
     <div class="hero-tags">
-      <span class="tag" id="tag-toon" tabindex="0" role="button" aria-pressed="false">TOON SHADER</span>
-      <span class="tag" id="tag-real" tabindex="0" role="button" aria-pressed="false">PHOTOREAL WEIGHT</span>
+      <button type="button" class="tag" id="tag-toon" aria-pressed="false">TOON SHADER</button>
+      <button type="button" class="tag" id="tag-real" aria-pressed="false">PHYSICAL WEIGHT</button>
     </div>
   </div>
-</div>
+  <a href="#work" class="scroll-hint" aria-label="작업 섹션으로 스크롤">↓</a>
+</header>
 
+<main>
 <section class="work" id="work">
   <div class="col toon" id="col-toon" tabindex="0" role="button" aria-pressed="false" aria-label="TOON SHADER 작업 보기">
     <div class="col-bg"></div>
     <div class="col-inner reveal">
       <div class="col-head">
         <div class="index">01 — CARTOON</div>
-        <div class="work-label" id="label-toon">TOON SHADER</div>
+        <h2 class="work-label" id="label-toon">TOON SHADER</h2>
         <div class="work-desc">크리쳐부터 사람까지 — 굵은 외곽선과 평면 셰이딩, 과장된 타이밍.</div>
       </div>
-      <div class="video-frame">
-        <iframe id="yt-toon" src="https://www.youtube-nocookie.com/embed/clMdal8VOGQ?enablejsapi=1" referrerpolicy="strict-origin-when-cross-origin" allow="autoplay; fullscreen; picture-in-picture" allowfullscreen></iframe>
+      <div class="video-frame" id="frame-toon">
+        <button type="button" class="video-facade" id="facade-toon" aria-label="TOON SHADER 데모 영상 재생">
+          <img src="https://img.youtube.com/vi/clMdal8VOGQ/hqdefault.jpg" alt="" loading="lazy">
+          <span class="play-icon" aria-hidden="true">▶</span>
+        </button>
       </div>
     </div>
   </div>
@@ -267,15 +312,19 @@
     <div class="col-inner reveal">
       <div class="col-head">
         <div class="index">02 — REALISTIC</div>
-        <div class="work-label" id="label-real">PHYSICAL WEIGHT</div>
+        <h2 class="work-label" id="label-real">PHYSICAL WEIGHT</h2>
         <div class="work-desc">모캡 기반, 중력과 관성을 살린 무게감 있는 움직임.</div>
       </div>
-      <div class="video-frame">
-        <iframe id="yt-real" src="https://www.youtube-nocookie.com/embed/X_EfCIHTrwE?enablejsapi=1" referrerpolicy="strict-origin-when-cross-origin" allow="autoplay; fullscreen; picture-in-picture" allowfullscreen></iframe>
+      <div class="video-frame" id="frame-real">
+        <button type="button" class="video-facade" id="facade-real" aria-label="PHYSICAL WEIGHT 데모 영상 재생">
+          <img src="https://img.youtube.com/vi/X_EfCIHTrwE/hqdefault.jpg" alt="" loading="lazy">
+          <span class="play-icon" aria-hidden="true">▶</span>
+        </button>
       </div>
     </div>
   </div>
 </section>
+</main>
 
 <footer>
   Contact — <a href="mailto:goodgkrdud@gmail.com">goodgkrdud@gmail.com</a>
@@ -331,8 +380,8 @@
   labelToon.addEventListener('click', (e) => { e.stopPropagation(); toggleLock('toon'); });
   labelReal.addEventListener('click', (e) => { e.stopPropagation(); toggleLock('real'); });
 
-  // 키보드 접근성 (Enter / Space)
-  [tagToon, tagReal, colToon, colReal].forEach(el => {
+  // 키보드 접근성 (Enter / Space) — button은 네이티브로 처리되므로 div 컬럼만 대상
+  [colToon, colReal].forEach(el => {
     el.addEventListener('keydown', (e) => {
       if(e.key === 'Enter' || e.key === ' '){
         e.preventDefault();
@@ -391,19 +440,57 @@
     }
   }
 
-  function onYouTubeIframeAPIReady(){
-    ytPlayers.toon = new YT.Player('yt-toon', {
-      events: { onStateChange: (e) => onPlayerStateChange('toon', e) }
-    });
-    ytPlayers.real = new YT.Player('yt-real', {
-      events: { onStateChange: (e) => onPlayerStateChange('real', e) }
+  // YouTube API는 실제로 재생 버튼을 누르기 전까지 로드하지 않는다 (초기 로딩 가볍게 유지)
+  function ensureYouTubeAPI(callback){
+    if(window.YT && window.YT.Player){ callback(); return; }
+    window.__ytApiCallbacks = window.__ytApiCallbacks || [];
+    window.__ytApiCallbacks.push(callback);
+    if(window.__ytApiLoading) return;
+    window.__ytApiLoading = true;
+    window.onYouTubeIframeAPIReady = function(){
+      window.__ytApiCallbacks.forEach(cb => cb());
+      window.__ytApiCallbacks = [];
+    };
+    const script = document.createElement('script');
+    script.src = 'https://www.youtube.com/iframe_api';
+    document.head.appendChild(script);
+  }
+
+  // 파사드(썸네일+재생버튼) 클릭 시에만 실제 iframe을 생성하고 재생
+  function playVideo(side, videoId, frameEl){
+    frameEl.innerHTML = '';
+    const iframe = document.createElement('iframe');
+    iframe.id = 'yt-' + side;
+    iframe.src = `https://www.youtube-nocookie.com/embed/${videoId}?enablejsapi=1&autoplay=1`;
+    iframe.referrerPolicy = 'strict-origin-when-cross-origin';
+    iframe.allow = 'autoplay; fullscreen; picture-in-picture';
+    iframe.allowFullscreen = true;
+    frameEl.appendChild(iframe);
+
+    const other = side === 'toon' ? 'real' : 'toon';
+    if(ytPlayers[other] && typeof ytPlayers[other].pauseVideo === 'function'){
+      ytPlayers[other].pauseVideo();
+    }
+    videoLockOwner = side;
+    locked = side;
+    setHover(side);
+    updateUI();
+
+    ensureYouTubeAPI(() => {
+      ytPlayers[side] = new YT.Player(iframe.id, {
+        events: { onStateChange: (e) => onPlayerStateChange(side, e) }
+      });
     });
   }
-  window.onYouTubeIframeAPIReady = onYouTubeIframeAPIReady;
 
-  const ytApiScript = document.createElement('script');
-  ytApiScript.src = 'https://www.youtube.com/iframe_api';
-  document.head.appendChild(ytApiScript);
+  document.getElementById('facade-toon').addEventListener('click', (e) => {
+    e.stopPropagation();
+    playVideo('toon', 'clMdal8VOGQ', document.getElementById('frame-toon'));
+  });
+  document.getElementById('facade-real').addEventListener('click', (e) => {
+    e.stopPropagation();
+    playVideo('real', 'X_EfCIHTrwE', document.getElementById('frame-real'));
+  });
 </script>
 
 </body>
