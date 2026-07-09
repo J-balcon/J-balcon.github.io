@@ -369,8 +369,7 @@
   }
   bindHover(tagToon, 'toon');
   bindHover(tagReal, 'real');
-  bindHover(colToon, 'toon');
-  bindHover(colReal, 'real');
+  // 영상 컬럼 자체에 마우스 올렸을 때 커졌다 작아졌다 하는 호버 확장은 제거 — 클릭으로만 확장/고정
 
   // 클릭/키보드로 고정 — 같은 쪽 다시 클릭하면 해제
   function toggleLock(name, {scroll} = {}){
