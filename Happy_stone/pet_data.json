@@ -1,4 +1,5 @@
 [
+    {"name":"그램푸", "initnum":24, "hp":35, "atk":38, "def":25, "agi":21},
     {"name":"[ 靑 ]가이록스", "initnum":24, "hp":32, "atk":40, "def":13, "agi":33},
     {"name":"가가로스", "initnum":26, "hp":32, "atk":40, "def":27, "agi":15},
     {"name":"가론고르", "initnum":26, "hp":31, "atk":42, "def":23, "agi":20},
