@@ -1,0 +1,303 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Git 명령어 노트</title>
+<style>
+  :root{
+    --bg:#0d1117;
+    --panel:#161b22;
+    --panel-2:#1c2230;
+    --line:#2a3038;
+    --ink:#e6edf3;
+    --dim:#8b949e;
+    --accent:#f78166;
+    --accent-2:#58a6ff;
+    --code:#c9d1d9;
+    --ok:#3fb950;
+    --mono:'SFMono-Regular',ui-monospace,'Cascadia Code','Consolas',monospace;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html{scroll-behavior:smooth}
+  body{
+    background:var(--bg);
+    color:var(--ink);
+    font-family:-apple-system,'Malgun Gothic','Apple SD Gothic Neo',system-ui,sans-serif;
+    line-height:1.5;
+    -webkit-font-smoothing:antialiased;
+  }
+
+  /* header */
+  header{
+    position:sticky;top:0;z-index:20;
+    background:rgba(13,17,23,.85);
+    backdrop-filter:blur(10px);
+    border-bottom:1px solid var(--line);
+    padding:18px 20px 14px;
+  }
+  .head-inner{max-width:820px;margin:0 auto}
+  .brand{display:flex;align-items:baseline;gap:12px;flex-wrap:wrap}
+  .brand h1{
+    font-size:1.5rem;font-weight:800;letter-spacing:-.02em;
+  }
+  .brand .tick{color:var(--accent);font-family:var(--mono)}
+  .brand span.sub{color:var(--dim);font-size:.82rem}
+  .search-wrap{position:relative;margin-top:14px}
+  #search{
+    width:100%;
+    background:var(--panel);
+    border:1px solid var(--line);
+    color:var(--ink);
+    font-size:1rem;
+    padding:12px 14px 12px 40px;
+    border-radius:10px;
+    outline:none;
+    transition:border-color .15s,box-shadow .15s;
+  }
+  #search:focus{border-color:var(--accent-2);box-shadow:0 0 0 3px rgba(88,166,255,.15)}
+  .search-wrap svg{
+    position:absolute;left:13px;top:50%;transform:translateY(-50%);
+    width:16px;height:16px;stroke:var(--dim);fill:none;stroke-width:2;
+  }
+  .count{margin-top:8px;font-size:.78rem;color:var(--dim);font-family:var(--mono)}
+
+  /* nav chips */
+  nav{max-width:820px;margin:14px auto 0;padding:0 20px;display:flex;gap:8px;flex-wrap:wrap}
+  nav a{
+    font-size:.8rem;color:var(--dim);text-decoration:none;
+    border:1px solid var(--line);padding:5px 11px;border-radius:20px;
+    transition:.15s;
+  }
+  nav a:hover{color:var(--ink);border-color:var(--accent-2);background:var(--panel)}
+
+  main{max-width:820px;margin:0 auto;padding:24px 20px 80px}
+
+  section{margin-top:32px}
+  section.hidden{display:none}
+  .sec-head{display:flex;align-items:center;gap:10px;margin-bottom:14px}
+  .sec-head .dot{width:8px;height:8px;border-radius:2px;background:var(--accent)}
+  .sec-head h2{font-size:1.05rem;font-weight:700;letter-spacing:-.01em}
+  .sec-head .kо{color:var(--dim);font-size:.8rem;font-weight:400}
+
+  .cmd{
+    background:var(--panel);
+    border:1px solid var(--line);
+    border-radius:10px;
+    padding:14px 16px;
+    margin-bottom:10px;
+    transition:border-color .15s;
+  }
+  .cmd.hidden{display:none}
+  .cmd:hover{border-color:#3a4150}
+  .cmd-top{display:flex;align-items:center;justify-content:space-between;gap:12px}
+  .cmd code{
+    font-family:var(--mono);
+    font-size:.92rem;
+    color:var(--accent);
+    word-break:break-all;
+  }
+  .cmd code .arg{color:var(--accent-2)}
+  .cmd .desc{color:var(--dim);font-size:.86rem;margin-top:6px}
+  .copy{
+    flex:none;
+    background:var(--panel-2);
+    border:1px solid var(--line);
+    color:var(--dim);
+    font-family:var(--mono);
+    font-size:.72rem;
+    padding:5px 9px;border-radius:6px;cursor:pointer;
+    transition:.15s;
+  }
+  .copy:hover{color:var(--ink);border-color:var(--accent-2)}
+  .copy.done{color:var(--bg);background:var(--ok);border-color:var(--ok)}
+
+  .empty{display:none;text-align:center;color:var(--dim);padding:60px 0;font-size:.9rem}
+  .empty.show{display:block}
+
+  footer{
+    max-width:820px;margin:0 auto;padding:0 20px 40px;
+    color:var(--dim);font-size:.75rem;text-align:center;
+  }
+  footer code{font-family:var(--mono);color:var(--accent-2)}
+
+  ::selection{background:rgba(247,129,102,.3)}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="head-inner">
+    <div class="brand">
+      <h1><span class="tick">$</span> Git 명령어 노트</h1>
+      <span class="sub">자주 쓰는 것만, 복사해서 바로</span>
+    </div>
+    <div class="search-wrap">
+      <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.5" y2="16.5"/></svg>
+      <input id="search" type="text" placeholder="검색… (예: 커밋, push, 되돌리기, branch)" autocomplete="off">
+    </div>
+    <div class="count" id="count"></div>
+  </div>
+</header>
+
+<nav id="nav"></nav>
+
+<main id="main"></main>
+
+<div class="empty" id="empty">일치하는 명령어가 없어요.</div>
+
+<footer>
+  로컬 → 스테이징(<code>git add</code>) → 커밋(<code>git commit</code>) → 원격(<code>git push</code>) 흐름을 기억하면 대부분 해결돼요.
+</footer>
+
+<script>
+// ── 명령어 데이터 ──────────────────────────────
+const DATA = [
+  { title:"기본 흐름", ko:"매일 쓰는 3단계", items:[
+    { cmd:'git add .', desc:'변경된 파일 전부를 스테이징(다음 커밋에 포함) 영역에 올림' },
+    { cmd:'git commit -m "메시지"', desc:'스테이징된 파일을 하나의 저장 지점으로 기록' },
+    { cmd:'git push', desc:'로컬 커밋을 GitHub 원격 저장소로 업로드' },
+    { cmd:'git status', desc:'현재 변경/스테이징 상태 확인 (초록=스테이징됨, 빨강=아직)' },
+    { cmd:'git pull', desc:'원격의 최신 내용을 가져와 로컬에 병합' },
+  ]},
+  { title:"처음 시작 / 설정", ko:"레포 만들고 연결", items:[
+    { cmd:'git init', desc:'현재 폴더를 git 저장소로 초기화' },
+    { cmd:'git branch -M main', desc:'현재 브랜치 이름을 main으로 변경' },
+    { cmd:'git remote add origin <URL>', desc:'GitHub 원격 저장소를 origin이라는 이름으로 연결' },
+    { cmd:'git push -u origin main', desc:'main 브랜치를 origin에 첫 푸시하고 추적 설정 (-u는 한 번만)' },
+    { cmd:'git clone <URL>', desc:'원격 저장소를 통째로 내려받아 새 폴더 생성' },
+    { cmd:'git config --global user.name "이름"', desc:'커밋에 기록될 사용자 이름 설정' },
+    { cmd:'git config --global user.email "메일"', desc:'커밋에 기록될 이메일 설정' },
+    { cmd:'git remote -v', desc:'연결된 원격 저장소 주소 확인' },
+  ]},
+  { title:"확인 / 조회", ko:"뭐가 어떻게 됐는지", items:[
+    { cmd:'git log --oneline', desc:'커밋 기록을 한 줄씩 간략히 표시' },
+    { cmd:'git log --oneline --graph --all', desc:'모든 브랜치를 그래프 형태로 보기' },
+    { cmd:'git diff', desc:'아직 스테이징 안 된 변경 내용 비교' },
+    { cmd:'git diff --staged', desc:'스테이징된 변경 내용 비교' },
+    { cmd:'git show <커밋해시>', desc:'특정 커밋의 상세 변경 내용 보기' },
+  ]},
+  { title:"브랜치", ko:"갈라서 작업하기", items:[
+    { cmd:'git branch', desc:'브랜치 목록 확인 (* 가 현재 위치)' },
+    { cmd:'git branch <이름>', desc:'새 브랜치 생성' },
+    { cmd:'git switch <이름>', desc:'해당 브랜치로 이동' },
+    { cmd:'git switch -c <이름>', desc:'브랜치를 새로 만들고 바로 이동' },
+    { cmd:'git merge <이름>', desc:'현재 브랜치에 지정한 브랜치를 병합' },
+    { cmd:'git branch -d <이름>', desc:'병합 끝난 브랜치 삭제' },
+  ]},
+  { title:"되돌리기 / 수정", ko:"실수했을 때", items:[
+    { cmd:'git restore <파일>', desc:'파일의 수정 사항을 마지막 커밋 상태로 되돌림' },
+    { cmd:'git restore --staged <파일>', desc:'스테이징만 취소 (수정 내용은 유지)' },
+    { cmd:'git commit --amend -m "새 메시지"', desc:'방금 한 커밋의 메시지/내용 수정' },
+    { cmd:'git reset --soft HEAD~1', desc:'마지막 커밋 취소, 변경 내용은 스테이징에 남김' },
+    { cmd:'git reset --hard HEAD~1', desc:'마지막 커밋과 변경 내용까지 완전히 삭제 (주의)' },
+    { cmd:'git revert <커밋해시>', desc:'해당 커밋을 취소하는 새 커밋 생성 (안전한 되돌리기)' },
+    { cmd:'git stash', desc:'현재 작업을 임시 보관하고 깨끗한 상태로 되돌림' },
+    { cmd:'git stash pop', desc:'임시 보관한 작업을 다시 꺼냄' },
+  ]},
+  { title:"파일 관리", ko:"추적 / 제외", items:[
+    { cmd:'git rm <파일>', desc:'파일을 삭제하고 그 삭제를 스테이징' },
+    { cmd:'git rm --cached <파일>', desc:'git 추적만 중단 (파일 자체는 남김)' },
+    { cmd:'git mv <원본> <대상>', desc:'파일 이름 변경/이동을 git이 추적하도록 처리' },
+  ]},
+];
+
+// ── 렌더링 ──────────────────────────────
+const main = document.getElementById('main');
+const nav  = document.getElementById('nav');
+const empty= document.getElementById('empty');
+const countEl = document.getElementById('count');
+
+function highlightArgs(cmd){
+  // <...> 로 감싼 인자와 "..." 를 강조
+  return cmd
+    .replace(/(&lt;[^&]*?&gt;)/g,'<span class="arg">$1</span>')
+    .replace(/(&lt;|<)([^<>]*?)(&gt;|>)/g,'<span class="arg">&lt;$2&gt;</span>');
+}
+function esc(s){return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
+
+DATA.forEach((sec,i)=>{
+  const id = 'sec'+i;
+  const s = document.createElement('section');
+  s.id = id;
+  s.dataset.sec = sec.title+' '+sec.ko;
+  s.innerHTML = `<div class="sec-head"><span class="dot"></span>
+    <h2>${sec.title}</h2><span class="kо">${sec.ko}</span></div>`;
+  sec.items.forEach(it=>{
+    const c = document.createElement('div');
+    c.className='cmd';
+    c.dataset.search = (it.cmd+' '+it.desc).toLowerCase();
+    c.innerHTML = `<div class="cmd-top">
+        <code>${highlightArgs(esc(it.cmd))}</code>
+        <button class="copy" data-cmd="${it.cmd.replace(/"/g,'&quot;')}">복사</button>
+      </div>
+      <div class="desc">${it.desc}</div>`;
+    s.appendChild(c);
+  });
+  main.appendChild(s);
+
+  const a = document.createElement('a');
+  a.href='#'+id; a.textContent=sec.title;
+  nav.appendChild(a);
+});
+
+// ── 복사 ──────────────────────────────
+main.addEventListener('click',e=>{
+  const btn = e.target.closest('.copy');
+  if(!btn) return;
+  const text = btn.dataset.cmd;
+  navigator.clipboard.writeText(text).then(()=>{
+    btn.textContent='복사됨'; btn.classList.add('done');
+    setTimeout(()=>{btn.textContent='복사'; btn.classList.remove('done');},1200);
+  }).catch(()=>{
+    // fallback
+    const t=document.createElement('textarea');t.value=text;document.body.appendChild(t);
+    t.select();document.execCommand('copy');t.remove();
+    btn.textContent='복사됨'; btn.classList.add('done');
+    setTimeout(()=>{btn.textContent='복사'; btn.classList.remove('done');},1200);
+  });
+});
+
+// ── 검색 ──────────────────────────────
+const search = document.getElementById('search');
+const allCmds = [...document.querySelectorAll('.cmd')];
+const allSecs = [...document.querySelectorAll('section')];
+const total = allCmds.length;
+countEl.textContent = `${total}개 명령어`;
+
+search.addEventListener('input',()=>{
+  const q = search.value.trim().toLowerCase();
+  let shown = 0;
+  if(!q){
+    allCmds.forEach(c=>c.classList.remove('hidden'));
+    allSecs.forEach(s=>s.classList.remove('hidden'));
+    empty.classList.remove('show');
+    nav.style.display='flex';
+    countEl.textContent = `${total}개 명령어`;
+    return;
+  }
+  nav.style.display='none';
+  allSecs.forEach(sec=>{
+    const cmds = [...sec.querySelectorAll('.cmd')];
+    let secShown = 0;
+    cmds.forEach(c=>{
+      const hit = c.dataset.search.includes(q);
+      c.classList.toggle('hidden',!hit);
+      if(hit){secShown++;shown++;}
+    });
+    sec.classList.toggle('hidden', secShown===0);
+  });
+  empty.classList.toggle('show', shown===0);
+  countEl.textContent = `${shown}개 찾음`;
+});
+
+// 단축키: / 로 검색 포커스
+document.addEventListener('keydown',e=>{
+  if(e.key==='/' && document.activeElement!==search){
+    e.preventDefault(); search.focus();
+  }
+  if(e.key==='Escape'){search.value='';search.dispatchEvent(new Event('input'));search.blur();}
+});
+</script>
+</body>
+</html>
