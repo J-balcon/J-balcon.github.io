@@ -253,9 +253,13 @@
 
   @media (max-width:800px){
     .work{flex-direction:column;min-height:auto;}
-    .col.toon, .col.real{clip-path:none;margin:0;padding:3rem 1.5rem;}
+    .col.toon, .col.real{
+      clip-path:none;margin:0;padding:3rem 1.5rem;
+      flex:none;justify-content:flex-start;
+    }
+    .col.toon{border-bottom:1px solid #2a2b2d;}
     .work.hover-toon .col.toon, .work.hover-toon .col.real,
-    .work.hover-real .col.real, .work.hover-real .col.toon{flex-grow:1;}
+    .work.hover-real .col.real, .work.hover-real .col.toon{flex-grow:0;}
   }
 
   /* ---------- FOOTER ---------- */
@@ -331,7 +335,7 @@
       </div>
       <div class="video-frame" id="frame-toon">
         <button type="button" class="video-facade" id="facade-toon" aria-label="CARTOON STYLE 데모 영상 재생">
-          <img src="https://img.youtube.com/vi/3DGrJWHhOJU/hqdefault.jpg" alt="" loading="lazy">
+          <img src="https://img.youtube.com/vi/f3Fky45g3IE/hqdefault.jpg" alt="" loading="lazy">
           <span class="play-icon" aria-hidden="true">▶</span>
         </button>
       </div>
@@ -348,7 +352,7 @@
       </div>
       <div class="video-frame" id="frame-real">
         <button type="button" class="video-facade" id="facade-real" aria-label="PHYSICAL WEIGHT 데모 영상 재생">
-          <img src="https://img.youtube.com/vi/XMNtYPrFcCE/hqdefault.jpg" alt="" loading="lazy">
+          <img src="https://img.youtube.com/vi/zi8mBgP_fVg/hqdefault.jpg" alt="" loading="lazy">
           <span class="play-icon" aria-hidden="true">▶</span>
         </button>
       </div>
@@ -515,11 +519,11 @@
 
   document.getElementById('facade-toon').addEventListener('click', (e) => {
     e.stopPropagation();
-    playVideo('toon', '3DGrJWHhOJU', document.getElementById('frame-toon'));
+    playVideo('toon', 'f3Fky45g3IE', document.getElementById('frame-toon'));
   });
   document.getElementById('facade-real').addEventListener('click', (e) => {
     e.stopPropagation();
-    playVideo('real', 'XMNtYPrFcCE', document.getElementById('frame-real'));
+    playVideo('real', 'zi8mBgP_fVg', document.getElementById('frame-real'));
   });
 </script>
 
